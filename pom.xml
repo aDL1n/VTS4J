@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.adlin</groupId>
-    <artifactId>Live2D_Controller</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>VTS4J</artifactId>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -42,6 +42,14 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub aDL1n Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/aDL1n/VTS4J</url>
+        </repository>
+    </distributionManagement>
 
 
 </project>
