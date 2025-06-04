@@ -42,12 +42,11 @@ public class VTSClient {
         authData.addProperty("pluginDeveloper", pluginDeveloper);
         authData.addProperty("pluginIcon", pluginIcon);
 
-        JsonObject authPayload = new JsonObject();
-        authPayload.addProperty("apiName", "VTubeStudioPublicAPI");
-        authPayload.addProperty("apiVersion", "1.0");
-        authPayload.addProperty("requestID", UUID.randomUUID().toString());
-        authPayload.addProperty("messageType", "AuthenticationTokenRequest");
-        authPayload.add("data", authData);
+        JsonObject authPayload = RequestBuilder.build(
+                UUID.randomUUID().toString(),
+                "AuthenticationTokenRequest",
+                authData
+        );
 
         return sendRequest(authPayload);
     }
