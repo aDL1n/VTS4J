@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class VTSClient {
@@ -17,7 +16,6 @@ public class VTSClient {
     private final VTSWebSocket webSocket;
     private final ConcurrentHashMap<String, CompletableFuture<JsonObject>> pendingRequests = new ConcurrentHashMap<>();
 
-
     public VTSClient(URI uri) {
         webSocket = new VTSWebSocket(uri);
 
@@ -25,7 +23,6 @@ public class VTSClient {
         webSocket.setMessageHandler(this::messageHandle);
         webSocket.setOnClose(null);
         webSocket.setOnError(null);
-
     }
 
     public void connect(){
@@ -64,8 +61,6 @@ public class VTSClient {
     private void messageHandle(String message) {
         JsonObject json = new Gson().fromJson(message, JsonObject.class);
         String requestId = json.get("requestID").getAsString();
-
-        LOGGER.log(Level.INFO, json.getAsString());
 
         CompletableFuture<JsonObject> responseFuture = pendingRequests.remove(requestId);
         responseFuture.complete(json);

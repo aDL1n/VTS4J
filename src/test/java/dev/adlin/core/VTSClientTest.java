@@ -42,7 +42,9 @@ public class VTSClientTest {
         VTSClient vts = new VTSClient(vtsUri);
         vts.connect();
 
-        vts.authenticate("Test", "Test", null).thenAccept(jsonObject -> Assertions.assertEquals(jsonObject, future.join()));
+        vts.authenticate("Test", "Test", null).thenAccept(jsonObject ->
+                Assertions.assertEquals(jsonObject, future.join())
+        );
     }
 
     @Test
