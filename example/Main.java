@@ -1,7 +1,8 @@
-package dev.adlin.core;
+package example;
 
 import com.google.gson.Gson;
-import dev.adlin.core.VTSClient;
+import dev.adlin.vts4j.VTSClient;
+import dev.adlin.vts4j.api.response.BaseResponse;
 
 import java.net.URI;
 

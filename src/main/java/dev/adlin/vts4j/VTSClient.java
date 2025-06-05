@@ -1,7 +1,9 @@
-package dev.adlin.core;
+package dev.adlin.vts4j;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.adlin.vts4j.core.RequestBuilder;
+import dev.adlin.vts4j.core.VTSWebSocket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

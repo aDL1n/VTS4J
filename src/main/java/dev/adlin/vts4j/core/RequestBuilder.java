@@ -1,4 +1,4 @@
-package dev.adlin.core;
+package dev.adlin.vts4j.core;
 
 import com.google.gson.JsonObject;
 
