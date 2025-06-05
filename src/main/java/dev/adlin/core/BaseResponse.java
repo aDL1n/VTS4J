@@ -1,9 +1,9 @@
 package dev.adlin.core;
 
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
+    import com.google.gson.JsonObject;
+    import com.google.gson.annotations.SerializedName;
 
-public class BaseResponse {
+public class BaseResponse implements IResponse {
     @SerializedName("messageType")
     private String messageType;
     @SerializedName("requestID")
