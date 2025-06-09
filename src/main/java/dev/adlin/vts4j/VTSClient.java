@@ -61,11 +61,20 @@ public class VTSClient {
     }
 
     private void messageHandle(String message) {
+
         JsonObject json = new Gson().fromJson(message, JsonObject.class);
+        String messageType = json.get("messageType").getAsString();
+
         String requestId = json.get("requestID").getAsString();
-
         CompletableFuture<JsonObject> responseFuture = pendingRequests.remove(requestId);
-        responseFuture.complete(json);
 
+        if (messageType.equals("APIError")) {
+            JsonObject data = json.getAsJsonObject("data");
+            String errorId = data.get("errorID").getAsString();
+            String errorMessage = data.get("message").getAsString();
+            responseFuture.completeExceptionally(new VTSException(errorId + " " + errorMessage));
+        } else {
+            responseFuture.complete(json);
+        }
     }
 }
