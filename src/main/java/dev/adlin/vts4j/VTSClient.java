@@ -90,7 +90,6 @@ public class VTSClient {
             checkCache();
         }
 
-        System.out.println(currentId);
         currentId = null;
     }
 
