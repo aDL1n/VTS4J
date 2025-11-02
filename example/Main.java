@@ -8,12 +8,16 @@ import java.net.URI;
 
 public class Main {
     public static void main(String[] args){
-        VTSClient vts = new VTSClient(URI.create("ws://0.0.0.0:8001"));
-        vts.connect();
+        VTSClient vtsClient = new VTSClient();
 
-        vts.authenticate("Test", "Test", null).thenAccept(jsonObject ->
-                System.out.println(new Gson().fromJson(jsonObject, BaseResponse.class).getData())
-        );
+        try {
+            vtsClient.connectBlocking();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
+        System.out.println(vtsClient.authenticate("Example", "test"));
+
+        vtsClient.sendRequest(RequestBuilder.build(UUID.randomUUID().toString(), "CurrentModelRequest", null)).thenAccept(System.out::println);
     }
 }
