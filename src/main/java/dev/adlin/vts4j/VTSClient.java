@@ -1,10 +1,9 @@
 package dev.adlin.vts4j;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.net.URI;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -12,20 +11,19 @@ import java.util.concurrent.TimeUnit;
 public class VTSClient {
 
     private final ClientSocket socket;
+    private final Gson gson = new Gson();
 
-    private final ConcurrentHashMap<String, CompletableFuture<JsonObject>> pendingRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
 
     public VTSClient(URI vtsAddress) {
         this.socket = new ClientSocket(vtsAddress);
 
-        socket.setOpenHandler(serverHandshake -> {
-            System.out.println("Connection opened");
-        });
+        socket.setOpenHandler(serverHandshake -> System.out.println("Connection opened"));
 
         socket.setMessageHandler(message -> {
-            JsonObject response = JsonParser.parseString(message).getAsJsonObject();
-            String requestId = response.get("requestID").getAsString();
-            CompletableFuture<JsonObject> future = pendingRequests.remove(requestId);
+            Response response = parseResponse(message);
+            String requestId = response.getRequestId();
+            CompletableFuture<Response> future = pendingRequests.remove(requestId);
             if (future != null) {
                 future.complete(response);
             }
@@ -38,9 +36,7 @@ public class VTSClient {
             pendingRequests.clear();
         });
 
-        socket.setErrorHandler(error -> {
-            System.out.println("Connection error: " + error);
-        });
+        socket.setErrorHandler(error -> System.out.println("Connection error: " + error));
     }
 
     public VTSClient() {
@@ -65,27 +61,39 @@ public class VTSClient {
         data.addProperty("pluginDeveloper", pluginDeveloper);
         data.addProperty("pluginIcon", "");
 
-        JsonObject authenticationTokenResponse = this.sendRequest(
-                RequestBuilder.build(UUID.randomUUID().toString(), "AuthenticationTokenRequest", data)
+        Response authenticationTokenResponse = this.sendRequest(
+                new Request.Builder()
+                        .setMessageType("AuthenticationTokenRequest")
+                        .setData(data)
+                        .build()
         ).join();
 
-        String authenticationToken = authenticationTokenResponse.get("data").getAsJsonObject()
+        String authenticationToken = authenticationTokenResponse.getData()
                 .get("authenticationToken").getAsString();
 
         JsonObject tokenData = new JsonObject();
         tokenData.addProperty("pluginName", pluginName);
         tokenData.addProperty("pluginDeveloper", pluginDeveloper);
         tokenData.addProperty("authenticationToken", authenticationToken);
-        this.sendRequest(RequestBuilder.build(UUID.randomUUID().toString(), "AuthenticationRequest", tokenData)).join();
+
+        this.sendRequest(
+                new Request.Builder()
+                        .setMessageType("AuthenticationRequest")
+                        .setData(tokenData)
+                        .build()
+        ).join();
     }
 
-    public CompletableFuture<JsonObject> sendRequest(JsonObject request) {
-        CompletableFuture<JsonObject> future = new CompletableFuture<>();
-        String requestId = request.get("requestID").getAsString();
-        this.pendingRequests.put(requestId, future);
+    public CompletableFuture<Response> sendRequest(Request request) {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+        this.pendingRequests.put(request.getRequestId(), future);
 
-        this.socket.send(request.toString());
+        this.socket.send(gson.toJson(request, Request.class));
         return future;
+    }
+
+    private Response parseResponse(String json) {
+        return gson.fromJson(json, Response.class);
     }
 
 }

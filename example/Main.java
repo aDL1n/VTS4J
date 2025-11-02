@@ -1,11 +1,5 @@
 package example;
 
-import com.google.gson.Gson;
-import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.api.response.BaseResponse;
-
-import java.net.URI;
-
 public class Main {
     public static void main(String[] args){
         VTSClient vtsClient = new VTSClient();
@@ -16,8 +10,12 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        System.out.println(vtsClient.authenticate("Example", "test"));
+        vtsClient.authenticate("Example", "test");
 
-        vtsClient.sendRequest(RequestBuilder.build(UUID.randomUUID().toString(), "CurrentModelRequest", null)).thenAccept(System.out::println);
+        vtsClient.sendRequest(
+                new Request.Builder()
+                        .setMessageType("CurrentModelRequest")
+                        .build()
+        ).thenAccept(System.out::println);
     }
 }
