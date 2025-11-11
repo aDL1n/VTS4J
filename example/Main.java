@@ -1,5 +1,6 @@
-package dev.adlin.vts4j;
+package example;
 
+import dev.adlin.vts4j.VTSClient;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.type.EventType;
 import dev.adlin.vts4j.type.RequestType;
