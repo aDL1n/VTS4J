@@ -1,7 +1,8 @@
-package dev.adlin.vts4j;
+package dev.adlin.vts4j.core;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import dev.adlin.vts4j.type.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,8 +80,13 @@ public class Request {
             return this;
         }
 
-        public Builder setMessageType(@NotNull String messageType) {
-            this.messageType = messageType;
+        public Builder setMessageType(@NotNull RequestType type) {
+            this.messageType = type.getRequestName();
+            return this;
+        }
+
+        public Builder setMessageType(@NotNull String type) {
+            this.messageType = type;
             return this;
         }
 

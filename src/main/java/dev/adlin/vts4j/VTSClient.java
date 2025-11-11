@@ -1,9 +1,18 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import dev.adlin.vts4j.core.ClientSocket;
+import dev.adlin.vts4j.core.EventListener;
+import dev.adlin.vts4j.core.Request;
+import dev.adlin.vts4j.core.Response;
+import dev.adlin.vts4j.exception.APIErrorException;
+import dev.adlin.vts4j.type.EventType;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +24,11 @@ public class VTSClient {
 
     private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
 
+    // registered event types
+    private final Set<String> registeredEvents = new HashSet<>();
+
+    private dev.adlin.vts4j.core.EventListener eventListener;
+
     public VTSClient(URI vtsAddress) {
         this.socket = new ClientSocket(vtsAddress);
 
@@ -23,9 +37,39 @@ public class VTSClient {
         socket.setMessageHandler(message -> {
             Response response = parseResponse(message);
             String requestId = response.getRequestId();
-            CompletableFuture<Response> future = pendingRequests.remove(requestId);
-            if (future != null) {
+            String messageType = response.getMessageType();
+
+            // Check message if is a response to request
+            if (pendingRequests.containsKey(requestId)) {
+                CompletableFuture<Response> future = pendingRequests.remove(requestId);
+                if (future == null) return;
+
+                switch (messageType) {
+                    case "APIError" -> {
+                        future.completeExceptionally(new APIErrorException(
+                                response.getData().get("message").getAsString(),
+                                response.getData().get("errorID").getAsInt()
+                        ));
+                        return;
+                    }
+                    case "EventSubscriptionResponse" -> {
+                        List<String> subscribedEvents = response.getData().get("subscribedEvents")
+                                .getAsJsonArray().asList()
+                                .stream().map(JsonElement::getAsString).toList();
+
+                        registeredEvents.addAll(subscribedEvents);
+                    }
+                    case null, default -> {
+                    }
+                }
+
                 future.complete(response);
+            }
+            // if this message not a response check may be this message is event
+            else if (eventListener != null && registeredEvents.contains(messageType)) {
+                EventType type = EventType.valueOfName(response.getMessageType());
+
+                eventListener.onEvent(type, response.getData());
             }
         });
 
@@ -36,7 +80,7 @@ public class VTSClient {
             pendingRequests.clear();
         });
 
-        socket.setErrorHandler(error -> System.out.println("Connection error: " + error));
+        socket.setErrorHandler(error -> System.out.println("Connection error: " + Arrays.toString(error.getStackTrace())));
     }
 
     public VTSClient() {
@@ -90,6 +134,33 @@ public class VTSClient {
 
         this.socket.send(gson.toJson(request, Request.class));
         return future;
+    }
+
+    public CompletableFuture<Response> registerEvent(EventType event, @Nullable JsonObject eventConfig) {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+
+        JsonObject data = new JsonObject();
+        data.addProperty("eventName", event.getName());
+        data.addProperty("subscribe", true);
+        if (eventConfig != null) data.add("config", eventConfig);
+
+        Request registerEventRequest = new Request.Builder()
+                .setMessageType("EventSubscriptionRequest")
+                .setData(data)
+                .build();
+
+        this.pendingRequests.put(registerEventRequest.getRequestId(), future);
+
+        this.socket.send(gson.toJson(registerEventRequest, Request.class));
+        return future;
+    }
+
+    public CompletableFuture<Response> registerEvent(EventType event) {
+        return this.registerEvent(event, null);
+    }
+
+    public void setEventListener(EventListener eventListener) {
+        this.eventListener = eventListener;
     }
 
     private Response parseResponse(String json) {

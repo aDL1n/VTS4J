@@ -1,4 +1,4 @@
-package dev.adlin.vts4j;
+package dev.adlin.vts4j.core;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;

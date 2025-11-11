@@ -1,4 +1,8 @@
-package example;
+package dev.adlin.vts4j;
+
+import dev.adlin.vts4j.core.Request;
+import dev.adlin.vts4j.type.EventType;
+import dev.adlin.vts4j.type.RequestType;
 
 public class Main {
     public static void main(String[] args){
@@ -14,8 +18,15 @@ public class Main {
 
         vtsClient.sendRequest(
                 new Request.Builder()
-                        .setMessageType("CurrentModelRequest")
+                        .setMessageType(RequestType.API_STATE)
                         .build()
         ).thenAccept(System.out::println);
+
+        vtsClient.setEventListener((event, data) -> {
+            System.out.println("Event received: " + event + " with data: " + data);
+        });
+
+        vtsClient.registerEvent(EventType.TEST);
+
     }
 }

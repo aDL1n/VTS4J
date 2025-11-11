@@ -1,4 +1,4 @@
-package dev.adlin.vts4j;
+package dev.adlin.vts4j.core;
 
 public class CloseReason {
     private int code;
