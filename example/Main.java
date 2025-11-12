@@ -2,6 +2,7 @@ package example;
 
 import dev.adlin.vts4j.VTSClient;
 import dev.adlin.vts4j.core.Request;
+import dev.adlin.vts4j.core.hotkey.HotkeyManager;
 import dev.adlin.vts4j.type.EventType;
 import dev.adlin.vts4j.type.RequestType;
 
@@ -29,5 +30,10 @@ public class Main {
 
         vtsClient.registerEvent(EventType.TEST);
 
+        // load available hotkeys
+        HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
+
+        // trigger hotkey by name
+        hotkeyManager.triggerHotkey("toggleMic");
     }
 }
