@@ -3,7 +3,7 @@ package dev.adlin.vts4j;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.core.ClientSocket;
+import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.core.EventListener;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.Response;
