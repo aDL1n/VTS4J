@@ -1,6 +1,6 @@
 package dev.adlin.vts4j.exception;
 
-public class APIErrorException extends Exception {
+public class APIErrorException extends RuntimeException {
     public APIErrorException(String message, int errorId) {
         super("Error message: " + message + " Error ID: " + errorId);
     }

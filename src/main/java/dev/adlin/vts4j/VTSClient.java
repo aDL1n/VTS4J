@@ -46,11 +46,12 @@ public class VTSClient {
 
                 switch (messageType) {
                     case "APIError" -> {
-                        future.completeExceptionally(new APIErrorException(
+                        final APIErrorException exception = new APIErrorException(
                                 response.getData().get("message").getAsString(),
-                                response.getData().get("errorID").getAsInt()
-                        ));
-                        return;
+                                response.getData().get("errorID").getAsInt());
+
+                        future.completeExceptionally(exception);
+                        throw exception;
                     }
                     case "EventSubscriptionResponse" -> {
                         List<String> subscribedEvents = response.getData().get("subscribedEvents")
