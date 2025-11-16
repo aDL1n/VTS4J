@@ -81,7 +81,7 @@ public class VTSClient {
             pendingRequests.clear();
         });
 
-        socket.setErrorHandler(error -> System.out.println("Connection error: " + Arrays.toString(error.getStackTrace())));
+        socket.setErrorHandler(error -> error.printStackTrace());
     }
 
     public VTSClient() {
