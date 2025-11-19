@@ -88,16 +88,24 @@ public class VTSClient {
         this(URI.create("ws://localhost:8001"));
     }
 
-    public void connect() {
+    public void connect(){
         this.socket.connect();
     }
 
-    public void connectBlocking() throws InterruptedException {
+    public void connectBlocking() throws InterruptedException{
         this.socket.connectBlocking();
     }
 
     public void connectBlocking(long timeout, TimeUnit timeUnit) throws InterruptedException {
         this.socket.connectBlocking(timeout, timeUnit);
+    }
+
+    public void disconnect() {
+        this.socket.close();
+    }
+
+    public void disconnectBlocking() throws InterruptedException {
+        this.socket.closeBlocking();
     }
 
     public void authenticate(String pluginName, String pluginDeveloper) {

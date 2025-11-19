@@ -5,6 +5,6 @@ Java library for VTubeStudio API
 <dependency>
   <groupId>dev.adlin</groupId>
   <artifactId>vts4j</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.3</version>
 </dependency>
 ```
