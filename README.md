@@ -1,5 +1,7 @@
 # VTS4J
-Java library for VTubeStudio API
+Lightweight Java library for VTube Studio API
+
+[Example](example/Main.java)
 
 ```xml
 <dependency>
