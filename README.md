@@ -2,7 +2,7 @@
 Lightweight Java library for VTube Studio API
 
 [Example](example/Main.java)
-[Javadoc]()
+[Javadoc](https://adl1n.github.io/VTS4J/)
 
 ```xml
 <dependency>
