@@ -1,5 +1,8 @@
 package dev.adlin.vts4j.type;
 
+/**
+ * Types of Request
+ */
 public enum RequestType {
     API_STATE("APIStateRequest"),
     STATISTICS("StatisticsRequest"),
@@ -43,6 +46,9 @@ public enum RequestType {
         this.requestName = requestName;
     }
 
+    /**
+     * @return Request name
+     */
     public String getRequestName() {
         return requestName;
     }

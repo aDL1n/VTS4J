@@ -8,6 +8,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+
+/**
+ * An object used to deserialize a request into JSON format and send it to the server.
+ */
 public class Request {
     @NotNull
     @SerializedName("apiName")
@@ -53,6 +57,10 @@ public class Request {
         return data;
     }
 
+
+    /**
+     * Builder for simplified Request creation.
+     */
     public static class Builder {
         @Nullable
         private String apiName;
@@ -65,36 +73,81 @@ public class Request {
         @Nullable
         private JsonObject data;
 
+        /**
+         * Sets the name of the API for the request.
+         *
+         * @param apiName The name of the API. Cannot be null.
+         * @return This Builder instance to allow method chaining.
+         */
         public Builder setApiName(@NotNull String apiName) {
             this.apiName = apiName;
             return this;
         }
 
+        /**
+         * Sets the version of the API for the request.
+         *
+         * @param apiVersion The version of the API. Cannot be null.
+         * @return This Builder instance to allow method chaining.
+         */
         public Builder setApiVersion(@NotNull String apiVersion) {
             this.apiVersion = apiVersion;
             return this;
         }
 
+        /**
+         * Sets the unique identifier for the request.
+         *
+         * @param requestId The unique identifier for the request. Cannot be null.
+         * @return This Builder instance to allow method chaining.
+         */
         public Builder setRequestId(@NotNull String requestId) {
             this.requestId = requestId;
             return this;
         }
 
+        /**
+         * Sets the type of the message for the request using a RequestType enum.
+         *
+         * @param type The type of the message as a RequestType enum. Cannot be null.
+         * @return This Builder instance to allow method chaining.
+         */
         public Builder setMessageType(@NotNull RequestType type) {
             this.messageType = type.getRequestName();
             return this;
         }
 
+        /**
+         * Sets the type of the message for the request using a String.
+         *
+         * @param type The type of the message as a String. Cannot be null.
+         * @return This Builder instance to allow method chaining.
+         */
         public Builder setMessageType(@NotNull String type) {
             this.messageType = type;
             return this;
         }
 
+        /**
+         *  Sets additional data required for certain types of requests.
+         *  More details about the data structure can be found at
+         *  <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master?tab=readme-ov-file#api-details">this page</a>.
+         *
+         * @param data Additional information required for certain types of requests
+         * @return This Builder instance to allow method chaining
+         */
         public Builder setData(@NotNull JsonObject data) {
             this.data = data;
             return this;
         }
 
+        /**
+         * Builds and returns a new Request object with the configured parameters.
+         * If messageType is not set, an IllegalArgumentException is thrown.
+         *
+         * @return A new Request object with the configured parameters.
+         * @throws IllegalArgumentException If messageType is null.
+         */
         public Request build() {
             if (messageType == null) throw new IllegalArgumentException("messageType cannot be null");
 

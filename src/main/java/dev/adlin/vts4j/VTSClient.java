@@ -108,6 +108,11 @@ public class VTSClient {
         this.socket.closeBlocking();
     }
 
+    /**
+     * Sends an authentication request with the specified plugin name and author.
+     * @param pluginName the name of your plugin
+     * @param pluginDeveloper plugin developer
+     */
     public void authenticate(String pluginName, String pluginDeveloper) {
         JsonObject data = new JsonObject();
         data.addProperty("pluginName", pluginName);
@@ -137,6 +142,13 @@ public class VTSClient {
         ).join();
     }
 
+    /**
+     * Sends a request to the server and returns a CompletableFuture to handle the response.
+     * The request is converted to JSON format and sent via a socket.
+     * The returned CompletableFuture can be used to obtain the server's response once it is available.
+     * @param request object to be sent to the server. This object will be serialized to JSON
+     * @return response from the server
+     */
     public CompletableFuture<Response> sendRequest(Request request) {
         CompletableFuture<Response> future = new CompletableFuture<>();
         this.pendingRequests.put(request.getRequestId(), future);
@@ -145,6 +157,15 @@ public class VTSClient {
         return future;
     }
 
+    /**
+     * Sends a request with an event type and
+     * returns a CompletableFuture that can be used to get the server's response
+     * and determine the status of the operation.
+     *
+     * @param event the type of event you need to register from EventType
+     * @param eventConfig additional configuration for the event (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
+     * @return CompletableFuture with a response about the success of the operation
+     */
     public CompletableFuture<Response> registerEvent(EventType event, @Nullable JsonObject eventConfig) {
         CompletableFuture<Response> future = new CompletableFuture<>();
 
@@ -164,10 +185,23 @@ public class VTSClient {
         return future;
     }
 
+    /**
+     * Sends a request with an event type and
+     * returns a CompletableFuture that can be used to get the server's response
+     * and determine the status of the operation.
+     * @param event the type of event you need to register from EventType
+     * @return CompletableFuture with a response about the success of the operation
+     */
     public CompletableFuture<Response> registerEvent(EventType event) {
         return this.registerEvent(event, null);
     }
 
+    /**
+     * Sets the event listener.
+     * The event listener will be notified of events occurring.
+     *
+     * @param eventListener The event listener to be set. This object will receive event notifications.
+     */
     public void setEventListener(EventListener eventListener) {
         this.eventListener = eventListener;
     }
