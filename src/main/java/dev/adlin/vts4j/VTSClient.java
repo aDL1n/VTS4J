@@ -73,12 +73,6 @@ public class VTSClient {
 
             Event<?> event = EventRegistry.createEvent(type, eventData);
             eventHandler.callEvent(event);
-
-//            else if (eventListener != null && registeredEvents.contains(messageType)) {
-//                EventType type = EventType.valueOfName(messageType);
-//
-//                eventListener.onEvent(type, response.getData());
-//            }
         });
 
         socket.setCloseHandler(closeReason -> {
@@ -170,10 +164,11 @@ public class VTSClient {
      * and determine the status of the operation.
      *
      * @param event the type of event you need to register from EventType
-     * @param eventConfig additional configuration for the event (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
+     * @param eventConfig additional configuration for the event
+     *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> registerEvent(EventType event, @Nullable JsonObject eventConfig) {
+    public CompletableFuture<Response> subscribeToEvent(EventType event, @Nullable JsonObject eventConfig) {
         CompletableFuture<Response> future = new CompletableFuture<>();
 
         JsonObject data = new JsonObject();
@@ -193,26 +188,25 @@ public class VTSClient {
     }
 
     /**
-     * Sends a request with an event type and
-     * returns a CompletableFuture that can be used to get the server's response
+     * Sends a request with an event type and config,
+     * and returns a CompletableFuture that can be used to get the server's response
      * and determine the status of the operation.
      * @param event the type of event you need to register from EventType
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> registerEvent(EventType event) {
-        return this.registerEvent(event, null);
+    public CompletableFuture<Response> subscribeToEvent(EventType event) {
+        return this.subscribeToEvent(event, null);
     }
 
     /**
-     * Sets the event listener.
-     * The event listener will be notified of events occurring.
+     * Registers event listener.
+     * <p>
+     * The registered listener will receive notifications for events that
+     * have been subscribed to using the {@link #subscribeToEvent(EventType, JsonObject)}
+     * or {@link #subscribeToEvent(EventType)} method.
      *
-     * @param eventListener The event listener to be set. This object will receive event notifications.
+     * @param listener an instance of a class implementing the {@link Listener} interface.
      */
-//    public void setEventListener(EventListener eventListener) {
-//        this.eventListener = eventListener;
-//    }
-
     public void registerEventListener(Listener listener) {
         eventHandler.registerListener(listener);
     }
