@@ -1,5 +1,8 @@
 dev.adlin.vts4j
 dev.adlin.vts4j.core
+dev.adlin.vts4j.core.event
+dev.adlin.vts4j.core.event.data
+dev.adlin.vts4j.core.event.impl
 dev.adlin.vts4j.core.hotkey
 dev.adlin.vts4j.core.socket
 dev.adlin.vts4j.exception
