@@ -24,16 +24,25 @@ public class Main {
                         .build()
         ).thenAccept(System.out::println);
 
-        vtsClient.setEventListener((event, data) -> {
-            System.out.println("Event received: " + event + " with data: " + data);
-        });
-
-        vtsClient.registerEvent(EventType.TEST);
+        client.registerEventListener(new TestListener());
+        client.registerEvent(EventType.TEST);
 
         // load available hotkeys
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
 
         // trigger hotkey by name
         hotkeyManager.triggerHotkey("toggleMic");
+    }
+
+    public static class TestListener implements Listener {
+        @EventListener()
+        public void test1(TestEvent event) {
+            System.out.println("test1 event called! " + event.getData().counter());
+        }
+
+        @EventListener(priority = EventPriority.HIGH)
+        public void test2(TestEvent event) {
+            System.out.println("test2 event called! " + event.getData().counter());
+        }
     }
 }

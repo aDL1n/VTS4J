@@ -3,16 +3,16 @@ package dev.adlin.vts4j;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.core.socket.ClientSocket;
-import dev.adlin.vts4j.core.EventListener;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.Response;
+import dev.adlin.vts4j.core.event.*;
+import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.exception.APIErrorException;
 import dev.adlin.vts4j.type.EventType;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -24,10 +24,7 @@ public class VTSClient {
 
     private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
 
-    // registered event types
-    private final Set<String> registeredEvents = new HashSet<>();
-
-    private dev.adlin.vts4j.core.EventListener eventListener;
+    private EventHandler eventHandler = new EventHandler();
 
     public VTSClient(URI vtsAddress) {
         this.socket = new ClientSocket(vtsAddress);
@@ -53,25 +50,35 @@ public class VTSClient {
                         future.completeExceptionally(exception);
                         throw exception;
                     }
-                    case "EventSubscriptionResponse" -> {
-                        List<String> subscribedEvents = response.getData().get("subscribedEvents")
-                                .getAsJsonArray().asList()
-                                .stream().map(JsonElement::getAsString).toList();
-
-                        registeredEvents.addAll(subscribedEvents);
-                    }
-                    case null, default -> {
-                    }
+//                    case "EventSubscriptionResponse" -> {
+//                        List<String> subscribedEvents = response.getData().get("subscribedEvents")
+//                                .getAsJsonArray().asList()
+//                                .stream().map(JsonElement::getAsString).toList();
+//
+////                        registeredEvents.addAll(subscribedEvents);
+//                    }
+//                    case null, default -> {
+//
+//                    }
                 }
 
                 future.complete(response);
             }
             // if this message not a response check may be this message is event
-            else if (eventListener != null && registeredEvents.contains(messageType)) {
-                EventType type = EventType.valueOfName(response.getMessageType());
+            EventType type = EventType.valueOfName(messageType);
+            if (type == null) return;
 
-                eventListener.onEvent(type, response.getData());
-            }
+            Class<? extends EventData> eventDataClass = EventRegistry.getEventDataClass(type);
+            EventData eventData = gson.fromJson(response.getData(), eventDataClass);
+
+            Event<?> event = EventRegistry.createEvent(type, eventData);
+            eventHandler.callEvent(event);
+
+//            else if (eventListener != null && registeredEvents.contains(messageType)) {
+//                EventType type = EventType.valueOfName(messageType);
+//
+//                eventListener.onEvent(type, response.getData());
+//            }
         });
 
         socket.setCloseHandler(closeReason -> {
@@ -202,8 +209,12 @@ public class VTSClient {
      *
      * @param eventListener The event listener to be set. This object will receive event notifications.
      */
-    public void setEventListener(EventListener eventListener) {
-        this.eventListener = eventListener;
+//    public void setEventListener(EventListener eventListener) {
+//        this.eventListener = eventListener;
+//    }
+
+    public void registerEventListener(Listener listener) {
+        eventHandler.registerListener(listener);
     }
 
     private Response parseResponse(String json) {
