@@ -2,7 +2,6 @@ package dev.adlin.vts4j.core;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import dev.adlin.vts4j.type.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

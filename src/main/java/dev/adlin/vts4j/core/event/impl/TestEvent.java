@@ -1,12 +1,11 @@
 package dev.adlin.vts4j.core.event.impl;
 
+import com.google.gson.annotations.SerializedName;
 import dev.adlin.vts4j.core.event.Event;
-import dev.adlin.vts4j.core.event.data.TestEventData;
 
-public class TestEvent extends Event<TestEventData> {
-
-    public TestEvent(TestEventData data) {
-        super(data);
-    }
+public record TestEvent(
+        @SerializedName("yourTestMessage") String testMessage,
+        @SerializedName("counter") Integer counter
+) implements Event {
 
 }

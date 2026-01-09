@@ -1,18 +1,16 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
 import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.exception.APIErrorException;
-import dev.adlin.vts4j.type.EventType;
+import dev.adlin.vts4j.core.event.EventType;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +21,7 @@ public class VTSClient {
     private final Gson gson = new Gson();
 
     private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
-
-    private EventHandler eventHandler = new EventHandler();
+    private final EventHandler eventHandler = new EventHandler();
 
     public VTSClient(URI vtsAddress) {
         this.socket = new ClientSocket(vtsAddress);
@@ -50,28 +47,19 @@ public class VTSClient {
                         future.completeExceptionally(exception);
                         throw exception;
                     }
-//                    case "EventSubscriptionResponse" -> {
-//                        List<String> subscribedEvents = response.getData().get("subscribedEvents")
-//                                .getAsJsonArray().asList()
-//                                .stream().map(JsonElement::getAsString).toList();
-//
-////                        registeredEvents.addAll(subscribedEvents);
-//                    }
-//                    case null, default -> {
-//
-//                    }
                 }
 
                 future.complete(response);
             }
+
             // if this message not a response check may be this message is event
             EventType type = EventType.valueOfName(messageType);
-            if (type == null) return;
+            if (type == null)
+                throw new NullPointerException("Event type is null");
 
-            Class<? extends EventData> eventDataClass = EventRegistry.getEventDataClass(type);
-            EventData eventData = gson.fromJson(response.getData(), eventDataClass);
+            Class<? extends Event> eventClass = EventRegistry.getEventClass(type);
+            Event event = gson.fromJson(response.getData(), eventClass);
 
-            Event<?> event = EventRegistry.createEvent(type, eventData);
             eventHandler.callEvent(event);
         });
 
@@ -82,7 +70,7 @@ public class VTSClient {
             pendingRequests.clear();
         });
 
-        socket.setErrorHandler(error -> error.printStackTrace());
+        socket.setErrorHandler(Throwable::printStackTrace);
     }
 
     public VTSClient() {

@@ -1,4 +1,4 @@
-package dev.adlin.vts4j.type;
+package dev.adlin.vts4j.core;
 
 /**
  * Types of Request

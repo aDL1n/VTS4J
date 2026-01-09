@@ -1,5 +1,7 @@
 package dev.adlin.vts4j.core.event;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -7,9 +9,9 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class EventHandler {
-    private final Map<Class<? extends Event<?>>, List<ListenerContainer>> events = new HashMap<>();
+    private final Map<Class<? extends Event>, List<ListenerContainer>> events = new HashMap<>();
 
-    public void callEvent(Event<?> event) {
+    public void callEvent(Event event) {
         if (eventsRegisteredForType(event.getClass())) {
             List<ListenerContainer> eventListeners = new ArrayList<>(events.get(event.getClass()));
 
@@ -34,7 +36,7 @@ public class EventHandler {
 
     private void registerListenerMethods(List<EventMethod> eventMethods) {
         for (EventMethod eventMethod : eventMethods) {
-            Consumer<Event<?>> listener = (event) -> {
+            Consumer<Event> listener = (event) -> {
                 try {
                     eventMethod.method.invoke(eventMethod.parent, event);
                 } catch (Exception e) {
@@ -82,8 +84,8 @@ public class EventHandler {
         return events.containsKey(eventType);
     }
 
-    private record ListenerContainer(Class<? extends Event<?>> eventType, Consumer<Event<?>> listener, EventPriority priority) {
-        public void notifyListener(Event<?> event) {
+    private record ListenerContainer(Class<? extends Event> eventType, Consumer<Event> listener, EventPriority priority) {
+        public void notifyListener(Event event) {
             listener.accept(event);
         }
     }
@@ -102,7 +104,7 @@ public class EventHandler {
 
     private static class EventMethod extends AnalyzedMethod {
         private final EventPriority priority;
-        private final Class<? extends Event<?>> eventType;
+        private final Class<? extends Event> eventType;
 
         private static EventMethod createFrom(AnalyzedMethod method) {
             return new EventMethod(method);
@@ -115,13 +117,15 @@ public class EventHandler {
             this.eventType = getEventType();
         }
 
-        private Class<? extends Event<?>> getEventType() {
+        @Nullable
+        @SuppressWarnings("unchecked")
+        private Class<? extends Event> getEventType() {
             if (method != null && method.getParameterCount() > 0) {
                 Class<?>[] params = method.getParameterTypes();
                 if (params.length > 0) {
                     Class<?> firstParam = params[0];
                     if (Event.class.isAssignableFrom(firstParam)) {
-                        return (Class<? extends Event<?>>) firstParam;
+                        return (Class<? extends Event>) firstParam;
                     }
                 }
 
@@ -130,6 +134,7 @@ public class EventHandler {
             return null;
         }
 
+        @Nullable
         private EventPriority getPriority() {
             for (Annotation annotation : this.annotations) {
                 if (annotation instanceof EventListener listener) {
