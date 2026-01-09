@@ -26,14 +26,14 @@ public class Request {
     private final String messageType;
     @Nullable
     @SerializedName("data")
-    private final JsonObject data;
+    private final JsonObject payload;
 
-    private Request(@NotNull String apiName,@NotNull String apiVersion,@NotNull String requestId,@NotNull String messageType,@Nullable JsonObject data) {
+    private Request(@NotNull String apiName,@NotNull String apiVersion,@NotNull String requestId,@NotNull String messageType,@Nullable JsonObject payload) {
         this.apiName = apiName;
         this.apiVersion = apiVersion;
         this.requestId = requestId;
         this.messageType = messageType;
-        this.data = data;
+        this.payload = payload;
     }
 
     public @NotNull String getApiName() {
@@ -52,8 +52,8 @@ public class Request {
         return messageType;
     }
 
-    public @Nullable JsonObject getData() {
-        return data;
+    public @Nullable JsonObject getPayload() {
+        return payload;
     }
 
 
@@ -70,7 +70,7 @@ public class Request {
         @NotNull
         private String messageType;
         @Nullable
-        private JsonObject data;
+        private JsonObject payload;
 
         /**
          * Sets the name of the API for the request.
@@ -128,15 +128,15 @@ public class Request {
         }
 
         /**
-         *  Sets additional data required for certain types of requests.
-         *  More details about the data structure can be found at
+         *  Sets payload required for certain types of requests.
+         *  More details about the payload structure can be found at
          *  <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master?tab=readme-ov-file#api-details">this page</a>.
          *
-         * @param data Additional information required for certain types of requests
+         * @param payload Additional information required for certain types of requests
          * @return This Builder instance to allow method chaining
          */
-        public Builder setData(@NotNull JsonObject data) {
-            this.data = data;
+        public Builder setPayload(@NotNull JsonObject payload) {
+            this.payload = payload;
             return this;
         }
 
@@ -155,7 +155,7 @@ public class Request {
                     apiVersion ==  null ? "1.0" : apiVersion,
                     requestId == null ? UUID.randomUUID().toString() : requestId,
                     messageType,
-                    data
+                    payload
             );
         }
     }

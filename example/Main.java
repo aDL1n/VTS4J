@@ -24,14 +24,16 @@ public class Main {
                         .build()
         ).thenAccept(System.out::println);
 
-        client.registerEventListener(new TestListener());
-        client.registerEvent(EventType.TEST);
+        vtsClient.registerEventListener(new TestListener());
 
-        // load available hotkeys
+        vtsClient.subscribeToEvent("TestEvent");
+
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
+        hotkeyManager.refresh();
+
 
         // trigger hotkey by name
-        hotkeyManager.trigger("toggleMic");
+//        hotkeyManager.trigger("toggleMic");
     }
 
     public static class TestListener implements Listener {

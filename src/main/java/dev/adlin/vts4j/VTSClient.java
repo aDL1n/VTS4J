@@ -5,10 +5,8 @@ import com.google.gson.JsonObject;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
-import dev.adlin.vts4j.core.event.impl.TestEvent;
 import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.exception.APIErrorException;
-import dev.adlin.vts4j.core.event.EventType;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -39,28 +37,26 @@ public class VTSClient {
                 CompletableFuture<Response> future = pendingRequests.remove(requestId);
                 if (future == null) return;
 
-                switch (messageType) {
-                    case "APIError" -> {
-                        final APIErrorException exception = new APIErrorException(
-                                response.getData().get("message").getAsString(),
-                                response.getData().get("errorID").getAsInt());
+                if (messageType.equals("APIError")) {
+                    final APIErrorException exception = new APIErrorException(
+                            response.getData().get("message").getAsString(),
+                            response.getData().get("errorID").getAsInt());
 
-                        future.completeExceptionally(exception);
-                        throw exception;
-                    }
+                    future.completeExceptionally(exception);
+                    throw exception;
                 }
 
                 future.complete(response);
+                return;
             }
 
             // if this message not a response check may be this message is event
-            EventType type = EventType.valueOfName(messageType);
-            if (type == null)
+            Class<? extends Event> eventClass = EventRegistry.getEventClass(messageType);
+
+            if (eventClass == null)
                 throw new NullPointerException("Event type is null");
 
-            Class<? extends Event> eventClass = EventRegistry.getEventClass(type);
             Event event = gson.fromJson(response.getData(), eventClass);
-
             eventHandler.callEvent(event);
         });
 
@@ -100,36 +96,41 @@ public class VTSClient {
 
     /**
      * Sends an authentication request with the specified plugin name and author.
-     * @param pluginName the name of your plugin
-     * @param pluginDeveloper plugin developer
+     * @param pluginMeta
      */
-    public void authenticate(String pluginName, String pluginDeveloper) {
-        JsonObject data = new JsonObject();
-        data.addProperty("pluginName", pluginName);
-        data.addProperty("pluginDeveloper", pluginDeveloper);
-        data.addProperty("pluginIcon", "");
+    public void authenticate(PluginMeta pluginMeta) {
+        String authenticationToken = this.requestAuthenticationToken(pluginMeta);
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("pluginName", pluginMeta.name());
+        payload.addProperty("pluginDeveloper", pluginMeta.developer());
+        payload.addProperty("authenticationToken", authenticationToken);
+
+        this.sendRequest(
+                new Request.Builder()
+                        .setMessageType("AuthenticationRequest")
+                        .setPayload(payload)
+                        .build()
+        ).join();
+    }
+
+    private String requestAuthenticationToken(PluginMeta pluginMeta) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("pluginName", pluginMeta.name());
+        payload.addProperty("pluginDeveloper", pluginMeta.developer());
+        payload.addProperty("pluginIcon", "");
 
         Response authenticationTokenResponse = this.sendRequest(
                 new Request.Builder()
                         .setMessageType("AuthenticationTokenRequest")
-                        .setData(data)
+                        .setPayload(payload)
                         .build()
         ).join();
 
         String authenticationToken = authenticationTokenResponse.getData()
                 .get("authenticationToken").getAsString();
 
-        JsonObject tokenData = new JsonObject();
-        tokenData.addProperty("pluginName", pluginName);
-        tokenData.addProperty("pluginDeveloper", pluginDeveloper);
-        tokenData.addProperty("authenticationToken", authenticationToken);
-
-        this.sendRequest(
-                new Request.Builder()
-                        .setMessageType("AuthenticationRequest")
-                        .setData(tokenData)
-                        .build()
-        ).join();
+        return authenticationToken;
     }
 
     /**
@@ -143,7 +144,13 @@ public class VTSClient {
         CompletableFuture<Response> future = new CompletableFuture<>();
         this.pendingRequests.put(request.getRequestId(), future);
 
-        this.socket.send(gson.toJson(request, Request.class));
+        try {
+            this.socket.send(gson.toJson(request, Request.class));
+        } catch (Exception e) {
+            pendingRequests.remove(request.getRequestId());
+            future.completeExceptionally(e);
+        }
+
         return future;
     }
 
@@ -152,47 +159,45 @@ public class VTSClient {
      * returns a CompletableFuture that can be used to get the server's response
      * and determine the status of the operation.
      *
-     * @param event the type of event you need to register from EventType
+     * @param eventName the name of event you need to register
      * @param eventConfig additional configuration for the event
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(EventType event, @Nullable JsonObject eventConfig) {
-        CompletableFuture<Response> future = new CompletableFuture<>();
+    public CompletableFuture<Response> subscribeToEvent(String eventName, @Nullable JsonObject eventConfig) {
+        if (!EventRegistry.exists(eventName))
+            throw new IllegalArgumentException("Invalid event name");
 
-        JsonObject data = new JsonObject();
-        data.addProperty("eventName", event.getName());
-        data.addProperty("subscribe", true);
-        if (eventConfig != null) data.add("config", eventConfig);
+        JsonObject payload = new JsonObject();
+        payload.addProperty("eventName", eventName);
+        payload.addProperty("subscribe", true);
+        if (eventConfig != null) payload.add("config", eventConfig);
 
         Request registerEventRequest = new Request.Builder()
                 .setMessageType("EventSubscriptionRequest")
-                .setData(data)
+                .setPayload(payload)
                 .build();
 
-        this.pendingRequests.put(registerEventRequest.getRequestId(), future);
-
-        this.socket.send(gson.toJson(registerEventRequest, Request.class));
-        return future;
+        return sendRequest(registerEventRequest);
     }
 
     /**
-     * Sends a request with an event type and config,
+     * Sends a request with an eventName and config,
      * and returns a CompletableFuture that can be used to get the server's response
      * and determine the status of the operation.
-     * @param event the type of event you need to register from EventType
+     * @param eventName the name of event you need to register
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(EventType event) {
-        return this.subscribeToEvent(event, null);
+    public CompletableFuture<Response> subscribeToEvent(String eventName) {
+        return this.subscribeToEvent(eventName, null);
     }
 
     /**
      * Registers event listener.
      * <p>
      * The registered listener will receive notifications for events that
-     * have been subscribed to using the {@link #subscribeToEvent(EventType, JsonObject)}
-     * or {@link #subscribeToEvent(EventType)} method.
+     * have been subscribed to using the {@link #subscribeToEvent(String, JsonObject)}
+     * or {@link #subscribeToEvent(String)} method.
      *
      * @param listener an instance of a class implementing the {@link Listener} interface.
      */
