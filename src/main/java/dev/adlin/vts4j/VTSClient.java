@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
+import dev.adlin.vts4j.core.event.impl.TestEvent;
 import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.exception.APIErrorException;
 import dev.adlin.vts4j.core.event.EventType;

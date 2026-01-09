@@ -31,18 +31,18 @@ public class Main {
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
 
         // trigger hotkey by name
-        hotkeyManager.triggerHotkey("toggleMic");
+        hotkeyManager.trigger("toggleMic");
     }
 
     public static class TestListener implements Listener {
         @EventListener()
         public void test1(TestEvent event) {
-            System.out.println("test1 event called! " + event.getData().counter());
+            System.out.println("test1 event called! " + event.counter());
         }
 
         @EventListener(priority = EventPriority.HIGH)
         public void test2(TestEvent event) {
-            System.out.println("test2 event called! " + event.getData().counter());
+            System.out.println("test2 event called! " + event.counter());
         }
     }
 }
