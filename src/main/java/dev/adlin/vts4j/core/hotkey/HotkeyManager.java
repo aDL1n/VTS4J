@@ -3,9 +3,9 @@ package dev.adlin.vts4j.core.hotkey;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.core.Request;
+import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.Response;
-import dev.adlin.vts4j.core.RequestType;
+import dev.adlin.vts4j.core.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +63,7 @@ public class HotkeyManager {
 
         this.client.sendRequest(new Request.Builder()
                 .setMessageType(RequestType.HOTKEY_TRIGGER)
-                .setData(payload)
+                .setPayload(payload)
                 .build()
         );
     }

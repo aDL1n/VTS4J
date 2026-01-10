@@ -2,7 +2,7 @@ package dev.adlin.vts4j;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.core.Request;
+import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
 import dev.adlin.vts4j.core.socket.ClientSocket;
@@ -30,34 +30,15 @@ public class VTSClient {
         socket.setMessageHandler(message -> {
             Response response = parseResponse(message);
             String requestId = response.getRequestId();
-            String messageType = response.getMessageType();
 
             // Check message if is a response to request
             if (pendingRequests.containsKey(requestId)) {
-                CompletableFuture<Response> future = pendingRequests.remove(requestId);
-                if (future == null) return;
-
-                if (messageType.equals("APIError")) {
-                    final APIErrorException exception = new APIErrorException(
-                            response.getData().get("message").getAsString(),
-                            response.getData().get("errorID").getAsInt());
-
-                    future.completeExceptionally(exception);
-                    throw exception;
-                }
-
-                future.complete(response);
+                handlePendingRequest(response);
                 return;
             }
 
             // if this message not a response check may be this message is event
-            Class<? extends Event> eventClass = EventRegistry.getEventClass(messageType);
-
-            if (eventClass == null)
-                throw new NullPointerException("Event type is null");
-
-            Event event = gson.fromJson(response.getData(), eventClass);
-            eventHandler.callEvent(event);
+            handleEventMessage(response);
         });
 
         socket.setCloseHandler(closeReason -> {
@@ -68,6 +49,31 @@ public class VTSClient {
         });
 
         socket.setErrorHandler(Throwable::printStackTrace);
+    }
+
+    private void handlePendingRequest(Response response) {
+        CompletableFuture<Response> future = pendingRequests.remove(response.getRequestId());
+        if (future == null) return;
+
+        if (response.getMessageType().equals("APIError")) {
+            final APIErrorException exception = new APIErrorException(
+                    response.getData().get("message").getAsString(),
+                    response.getData().get("errorID").getAsInt());
+
+            future.completeExceptionally(exception);
+            throw exception;
+        }
+
+        future.complete(response);
+    }
+
+    private void handleEventMessage(Response response) {
+        Class<? extends Event> eventClass = EventRegistry.getEventClass(response.getMessageType());
+        if (eventClass == null)
+            throw new NullPointerException("Event type is null");
+
+        Event event = gson.fromJson(response.getData(), eventClass);
+        eventHandler.callEvent(event);
     }
 
     public VTSClient() {
