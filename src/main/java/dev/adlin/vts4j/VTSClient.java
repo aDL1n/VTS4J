@@ -29,10 +29,10 @@ public class VTSClient {
 
         socket.setMessageHandler(message -> {
             Response response = parseResponse(message);
-            String requestId = response.getRequestId();
 
+            String requestId = response.getRequestId();
             // Check message if is a response to request
-            if (pendingRequests.containsKey(requestId)) {
+            if (isResponseToRequest(requestId)) {
                 handlePendingRequest(response);
                 return;
             }
@@ -49,6 +49,10 @@ public class VTSClient {
         });
 
         socket.setErrorHandler(Throwable::printStackTrace);
+    }
+
+    private boolean isResponseToRequest(String requestId) {
+        return pendingRequests.containsKey(requestId);
     }
 
     private void handlePendingRequest(Response response) {
