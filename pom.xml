@@ -6,16 +6,13 @@
 
     <groupId>dev.adlin</groupId>
     <artifactId>vts4j</artifactId>
-    <version>1.3</version>
+    <version>1.3.1</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-    </repositories>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
@@ -24,23 +21,27 @@
             <artifactId>gson</artifactId>
             <version>2.13.1</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>26.0.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.13.0</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.3</version>
         </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
