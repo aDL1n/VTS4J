@@ -1,13 +1,12 @@
 package dev.adlin.vts4j.core.event;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import dev.adlin.vts4j.core.event.impl.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class EventRegistry {
-    private static final Map<String, Class<? extends Event>> eventClasses = new HashMap<>();
+    private static final BiMap<String, Class<? extends Event>> eventClasses = HashBiMap.create();
 
     static {
          register("TestEvent", TestEvent.class);
@@ -34,7 +33,11 @@ public class EventRegistry {
         return eventClasses.get(eventName);
     }
 
-    public static boolean exists(String eventName) {
-        return eventClasses.containsKey(eventName);
+    public static boolean exists(Class<? extends Event> eventClass) {
+        return eventClasses.containsValue(eventClass);
+    }
+
+    public static String getName(Class<? extends Event> eventClass) {
+        return eventClasses.inverse().get(eventClass);
     }
 }

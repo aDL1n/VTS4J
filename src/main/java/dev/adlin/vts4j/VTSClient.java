@@ -170,44 +170,44 @@ public class VTSClient {
      * returns a CompletableFuture that can be used to get the server's response
      * and determine the status of the operation.
      *
-     * @param eventName the name of event you need to register
+     * @param eventClass the class of event you need to subscribe
      * @param eventConfig additional configuration for the event
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(@NotNull String eventName, @Nullable JsonObject eventConfig) {
-        return sendSubscribeRequest(eventName, eventConfig, true);
+    public CompletableFuture<Response> subscribeToEvent(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+        return sendSubscribeRequest(eventClass, eventConfig, true);
     }
 
     /**
      * Sends a request with an eventName and config,
      * and returns a CompletableFuture that can be used to get the server's response
      * and determine the status of the operation.
-     * @param eventName the name of event you need to register
+     * @param eventClass the class of event you need to subscribe
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(@NotNull String eventName) {
-        return this.subscribeToEvent(eventName, null);
+    public CompletableFuture<Response> subscribeToEvent(@NotNull Class<? extends Event> eventClass) {
+        return this.subscribeToEvent(eventClass, null);
     }
 
-    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull String eventName, @Nullable JsonObject eventConfig) {
-        return sendSubscribeRequest(eventName, eventConfig, false);
+    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+        return sendSubscribeRequest(eventClass, eventConfig, false);
     }
 
-    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull String eventName) {
-        return this.unsubscribeFromEvent(eventName, null);
+    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull Class<? extends Event> eventClass) {
+        return this.unsubscribeFromEvent(eventClass, null);
     }
 
     private CompletableFuture<Response> sendSubscribeRequest(
-            @NotNull String eventName,
+            @NotNull Class<? extends Event> eventClass,
             @Nullable JsonObject config,
             boolean subscribe
     ) {
-        if (!EventRegistry.exists(eventName))
+        if (!EventRegistry.exists(eventClass))
             throw new IllegalArgumentException("Invalid event name");
 
         JsonObject payload = new JsonObject();
-        payload.addProperty("eventName", eventName);
+        payload.addProperty("eventName", EventRegistry.getName(eventClass));
         payload.addProperty("subscribe", subscribe);
         if (config != null) payload.add("config", config);
 
@@ -223,8 +223,8 @@ public class VTSClient {
      * Registers event listener.
      * <p>
      * The registered listener will receive notifications for events that
-     * have been subscribed to using the {@link #subscribeToEvent(String, JsonObject)}
-     * or {@link #subscribeToEvent(String)} method.
+     * have been subscribed to using the {@link #subscribeToEvent(Class<? extends Event>, JsonObject)}
+     * or {@link #subscribeToEvent(Class<? extends Event>)} method.
      *
      * @param listener an instance of a class implementing the {@link Listener} interface.
      */

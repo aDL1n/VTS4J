@@ -1,5 +1,6 @@
 package dev.adlin.vts4j;
 
+import dev.adlin.vts4j.core.event.impl.TestEvent;
 import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.request.RequestType;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
@@ -57,6 +58,6 @@ public class ClientTest {
     public void testEventSubscribe() {
         VTSClient client = createAndConnectClient();
 
-        client.subscribeToEvent("TestEvent").join();
+        client.subscribeToEvent(TestEvent.class).join();
     }
 }
