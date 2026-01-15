@@ -58,6 +58,6 @@ public class ClientTest {
     public void testEventSubscribe() {
         VTSClient client = createAndConnectClient();
 
-        client.subscribeToEvent(TestEvent.class).join();
+        client.subscribe(TestEvent.class).join();
     }
 }

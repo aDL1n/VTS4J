@@ -175,7 +175,7 @@ public class VTSClient {
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+    public CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
         return sendSubscribeRequest(eventClass, eventConfig, true);
     }
 
@@ -186,16 +186,16 @@ public class VTSClient {
      * @param eventClass the class of event you need to subscribe
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(@NotNull Class<? extends Event> eventClass) {
-        return this.subscribeToEvent(eventClass, null);
+    public CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass) {
+        return this.subscribe(eventClass, null);
     }
 
-    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+    public CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
         return sendSubscribeRequest(eventClass, eventConfig, false);
     }
 
-    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull Class<? extends Event> eventClass) {
-        return this.unsubscribeFromEvent(eventClass, null);
+    public CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass) {
+        return this.unsubscribe(eventClass, null);
     }
 
     private CompletableFuture<Response> sendSubscribeRequest(
@@ -223,8 +223,8 @@ public class VTSClient {
      * Registers event listener.
      * <p>
      * The registered listener will receive notifications for events that
-     * have been subscribed to using the {@link #subscribeToEvent(Class<? extends Event>, JsonObject)}
-     * or {@link #subscribeToEvent(Class<? extends Event>)} method.
+     * have been subscribed to using the {@link #subscribe(Class<? extends Event>, JsonObject)}
+     * or {@link #subscribe(Class<? extends Event>)} method.
      *
      * @param listener an instance of a class implementing the {@link Listener} interface.
      */

@@ -5,6 +5,7 @@ import dev.adlin.vts4j.core.Request;
 import dev.adlin.vts4j.core.hotkey.HotkeyManager;
 import dev.adlin.vts4j.type.EventType;
 import dev.adlin.vts4j.type.RequestType;
+import dev.adlin.vts4j.core.event.impl.TestEvent;
 
 public class Main {
     public static void main(String[] args){
@@ -26,7 +27,7 @@ public class Main {
 
         vtsClient.registerEventListener(new TestListener());
 
-        vtsClient.subscribeToEvent("TestEvent");
+        vtsClient.subscribe(TestEvent.class);
 
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
         hotkeyManager.refresh();
