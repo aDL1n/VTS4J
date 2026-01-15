@@ -7,6 +7,7 @@ import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
 import dev.adlin.vts4j.core.socket.ClientSocket;
 import dev.adlin.vts4j.exception.APIErrorException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -174,21 +175,8 @@ public class VTSClient {
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(String eventName, @Nullable JsonObject eventConfig) {
-        if (!EventRegistry.exists(eventName))
-            throw new IllegalArgumentException("Invalid event name");
-
-        JsonObject payload = new JsonObject();
-        payload.addProperty("eventName", eventName);
-        payload.addProperty("subscribe", true);
-        if (eventConfig != null) payload.add("config", eventConfig);
-
-        Request registerEventRequest = new Request.Builder()
-                .setMessageType("EventSubscriptionRequest")
-                .setPayload(payload)
-                .build();
-
-        return sendRequest(registerEventRequest);
+    public CompletableFuture<Response> subscribeToEvent(@NotNull String eventName, @Nullable JsonObject eventConfig) {
+        return sendSubscribeRequest(eventName, eventConfig, true);
     }
 
     /**
@@ -198,8 +186,37 @@ public class VTSClient {
      * @param eventName the name of event you need to register
      * @return CompletableFuture with a response about the success of the operation
      */
-    public CompletableFuture<Response> subscribeToEvent(String eventName) {
+    public CompletableFuture<Response> subscribeToEvent(@NotNull String eventName) {
         return this.subscribeToEvent(eventName, null);
+    }
+
+    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull String eventName, @Nullable JsonObject eventConfig) {
+        return sendSubscribeRequest(eventName, eventConfig, false);
+    }
+
+    public CompletableFuture<Response> unsubscribeFromEvent(@NotNull String eventName) {
+        return this.unsubscribeFromEvent(eventName, null);
+    }
+
+    private CompletableFuture<Response> sendSubscribeRequest(
+            @NotNull String eventName,
+            @Nullable JsonObject config,
+            boolean subscribe
+    ) {
+        if (!EventRegistry.exists(eventName))
+            throw new IllegalArgumentException("Invalid event name");
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("eventName", eventName);
+        payload.addProperty("subscribe", subscribe);
+        if (config != null) payload.add("config", config);
+
+        Request unsibscribeEventRequest = new Request.Builder()
+                .setMessageType("EventSubscriptionRequest")
+                .setPayload(payload)
+                .build();
+
+        return sendRequest(unsibscribeEventRequest);
     }
 
     /**

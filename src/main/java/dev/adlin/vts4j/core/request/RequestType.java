@@ -4,6 +4,7 @@ package dev.adlin.vts4j.core.request;
  * Types of Request
  */
 public enum RequestType {
+    API_STATE_BROADCAST("VTubeStudioAPIStateBroadcast"),
     API_STATE("APIStateRequest"),
     STATISTICS("StatisticsRequest"),
     VTS_FOLDER_INFO("VTSFolderInfoRequest"),

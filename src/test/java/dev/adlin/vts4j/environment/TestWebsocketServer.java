@@ -49,28 +49,48 @@ public class TestWebsocketServer extends WebSocketServer {
                 response = generateAuthenticationResponse(requestId, request.getPayload());
                 authenticatedSockets.add(conn);
             }
+            case "VTubeStudioAPIStateBroadcast" -> response = generateApiStateResponse(requestId);
+            case "EventSubscriptionRequest" -> response = generateEventSubscriptionResponse(requestId);
         }
 
         if (response != null) conn.send(gson.toJson(response));
     }
 
+    private JsonObject generateEventSubscriptionResponse(String requestId) {
+        JsonObject response = generateResponseTemplate(requestId, "EventSubscriptionResponse");
+        return response;
+    }
+
+    private JsonObject generateApiStateResponse(String requestId) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("active", false);
+        payload.addProperty("port", getPort());
+        payload.addProperty("instanceID", "93aa0d0494304fddb057ae8a295c4e59");
+        payload.addProperty("windowTitle", "Test");
+
+        JsonObject response = generateResponseTemplate(requestId, "APIStateRequest");
+        response.add("data", payload);
+
+        return response;
+    }
+
     private JsonObject generateAuthenticationResponse(String requestId, JsonObject requestPayload) {
-        JsonObject data = new JsonObject();
-        data.addProperty("authenticated", true);
-        data.addProperty("reason", "Token valid. The plugin is authenticated for the duration of this session.");
+        JsonObject payload = new JsonObject();
+        payload.addProperty("authenticated", true);
+        payload.addProperty("reason", "Token valid. The plugin is authenticated for the duration of this session.");
 
         JsonObject response = generateResponseTemplate(requestId, "AuthenticationResponse");
-        response.add("data", data);
+        response.add("data", payload);
 
         return response;
     }
 
     private JsonObject generateAuthenticationTokenResponse(String requestId) {
-        JsonObject data = new JsonObject();
-        data.addProperty("authenticationToken", authenticationToken.toString());
+        JsonObject payload = new JsonObject();
+        payload.addProperty("authenticationToken", authenticationToken.toString());
 
         JsonObject response = generateResponseTemplate(requestId, "AuthenticationTokenResponse");
-        response.add("data", data);
+        response.add("data", payload);
         return response;
     }
 

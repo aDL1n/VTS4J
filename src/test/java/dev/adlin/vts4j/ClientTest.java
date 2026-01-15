@@ -1,5 +1,7 @@
 package dev.adlin.vts4j;
 
+import dev.adlin.vts4j.core.request.Request;
+import dev.adlin.vts4j.core.request.RequestType;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,5 +40,23 @@ public class ClientTest {
         VTSClient client = createAndConnectClient();
 
         client.authenticate(testPluginMeta);
+    }
+
+    @Test
+    public void testRequest() {
+        VTSClient client = createAndConnectClient();
+
+        Request request = new Request.Builder()
+                .setMessageType(RequestType.API_STATE_BROADCAST)
+                .build();
+
+        client.sendRequest(request).join();
+    }
+
+    @Test
+    public void testEventSubscribe() {
+        VTSClient client = createAndConnectClient();
+
+        client.subscribeToEvent("TestEvent").join();
     }
 }
