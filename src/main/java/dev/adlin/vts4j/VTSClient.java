@@ -24,7 +24,7 @@ public class VTSClient {
     private final EventHandler eventHandler;
     private final MessageHandler messageHandler;
 
-    public VTSClient(URI vtsAddress) {
+    protected VTSClient(URI vtsAddress) {
         this.networkHandler = new NetworkHandler(vtsAddress);
         this.eventHandler = new EventHandler();
         this.requestDispatcher = new RequestDispatcher(networkHandler);
@@ -54,12 +54,14 @@ public class VTSClient {
         this(URI.create("ws://localhost:8001"));
     }
 
-    public void connect(){
+    public VTSClient connect(){
         networkHandler.connect();
+        return this;
     }
 
-    public void awaitConnect() {
+    public VTSClient awaitConnect() {
         networkHandler.awaitConnect();
+        return this;
     }
 
     public void awaitConnect(long timeout, TimeUnit timeUnit) {

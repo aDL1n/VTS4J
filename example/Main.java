@@ -1,23 +1,25 @@
 package example;
 
-import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.core.Request;
+
+import dev.adlin.vts4j.core.event.EventListener;
+import dev.adlin.vts4j.core.event.EventPriority;
+import dev.adlin.vts4j.core.event.Listener;
 import dev.adlin.vts4j.core.hotkey.HotkeyManager;
-import dev.adlin.vts4j.type.EventType;
-import dev.adlin.vts4j.type.RequestType;
+import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.event.impl.TestEvent;
+import dev.adlin.vts4j.core.request.RequestType;
+import dev.adlin.vts4j.VTSClientBuilder;
+import dev.adlin.vts4j.VTSClient;
 
 public class Main {
     public static void main(String[] args){
-        VTSClient vtsClient = new VTSClient();
+        VTSClient vtsClient = VTSClientBuilder.create()
+                .registerListeners(new TestListener())
+                .build()
+                .awaitConnect();
 
-        try {
-            vtsClient.connectBlocking();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        vtsClient.authenticate("Example", "test");
+        PluginMeta pluginMeta = new PluginMeta("Example", "test");
+        vtsClient.authenticate(pluginMeta);
 
         vtsClient.sendRequest(
                 new Request.Builder()
@@ -25,13 +27,10 @@ public class Main {
                         .build()
         ).thenAccept(System.out::println);
 
-        vtsClient.registerEventListener(new TestListener());
-
         vtsClient.subscribe(TestEvent.class);
 
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
         hotkeyManager.refresh();
-
 
         // trigger hotkey by name
 //        hotkeyManager.trigger("toggleMic");
