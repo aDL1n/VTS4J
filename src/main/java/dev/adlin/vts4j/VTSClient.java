@@ -3,6 +3,7 @@ package dev.adlin.vts4j;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.core.MessageHandler;
 import dev.adlin.vts4j.core.event.impl.WebsocketCloseEvent;
+import dev.adlin.vts4j.core.event.impl.WebsocketErrorEvent;
 import dev.adlin.vts4j.core.event.impl.WebsocketOpenEvent;
 import dev.adlin.vts4j.core.network.NetworkHandler;
 import dev.adlin.vts4j.core.request.Request;
@@ -27,18 +28,24 @@ public class VTSClient {
         this.networkHandler = new NetworkHandler(vtsAddress);
         this.eventHandler = new EventHandler();
         this.requestDispatcher = new RequestDispatcher(networkHandler);
-
         this.messageHandler = new MessageHandler(requestDispatcher, eventHandler);
 
         networkHandler.setMessageHandler(messageHandler);
+
         networkHandler.onOpen(handshake -> {
             WebsocketOpenEvent event = new WebsocketOpenEvent(handshake);
             eventHandler.callEvent(event);
         });
+
         networkHandler.onClose(closeReason -> {
             requestDispatcher.closeAll();
 
             WebsocketCloseEvent event = new WebsocketCloseEvent(closeReason);
+            eventHandler.callEvent(event);
+        });
+
+        networkHandler.setErrorHandler(exception -> {
+            WebsocketErrorEvent event = new WebsocketErrorEvent(exception);
             eventHandler.callEvent(event);
         });
     }

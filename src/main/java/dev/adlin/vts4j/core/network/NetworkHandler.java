@@ -14,8 +14,6 @@ public class NetworkHandler {
 
     public NetworkHandler(URI address) {
         this.socket = new ClientSocket(address);
-
-        setErrorHandler(Throwable::printStackTrace);
     }
 
     public void awaitConnect() {
@@ -61,7 +59,7 @@ public class NetworkHandler {
         socket.setMessageHandler(handleMessage);
     }
 
-    public void setErrorHandler(Consumer<Throwable> handler) {
+    public void setErrorHandler(Consumer<Exception> handler) {
         socket.setErrorHandler(handler);
     }
 

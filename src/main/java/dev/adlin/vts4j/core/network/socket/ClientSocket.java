@@ -11,7 +11,7 @@ public class ClientSocket extends WebSocketClient {
     private Consumer<ServerHandshake> openHandler;
     private Consumer<String> messageHandler;
     private Consumer<CloseReason> closeHandler;
-    private Consumer<Throwable> errorHandler;
+    private Consumer<Exception> errorHandler;
 
     public ClientSocket(URI serverUri) {
         super(serverUri);
@@ -73,7 +73,7 @@ public class ClientSocket extends WebSocketClient {
      *
      * @param onError The handler to be called on error. Receives a Throwable object.
      */
-    public void setErrorHandler(Consumer<Throwable> onError) {
+    public void setErrorHandler(Consumer<Exception> onError) {
         this.errorHandler = onError;
     }
 }
