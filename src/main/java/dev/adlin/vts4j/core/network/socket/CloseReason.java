@@ -1,4 +1,4 @@
-package dev.adlin.vts4j.core.socket;
+package dev.adlin.vts4j.core.network.socket;
 
 /**
  * An object for convenient work with reasons for WebSocket closure

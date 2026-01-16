@@ -37,6 +37,10 @@ public class EventRegistry {
         return eventClasses.containsValue(eventClass);
     }
 
+    public static boolean exists(String eventName) {
+        return eventClasses.containsKey(eventName);
+    }
+
     public static String getName(Class<? extends Event> eventClass) {
         return eventClasses.inverse().get(eventClass);
     }

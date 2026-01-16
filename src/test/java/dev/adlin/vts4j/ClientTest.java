@@ -20,20 +20,16 @@ public class ClientTest {
 
     public VTSClient createAndConnectClient() {
         VTSClient client = new VTSClient();
-        try {
-            client.connectBlocking();
+        client.awaitConnect();
 
-            return client;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return client;
     }
 
     @Test
-    public void connectionTest() throws InterruptedException {
+    public void connectionTest() {
         VTSClient client = new VTSClient();
 
-        client.connectBlocking();
+        client.awaitConnect();
     }
 
     @Test

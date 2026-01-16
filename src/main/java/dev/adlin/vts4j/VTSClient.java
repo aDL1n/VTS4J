@@ -1,84 +1,46 @@
 package dev.adlin.vts4j;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.adlin.vts4j.core.MessageHandler;
+import dev.adlin.vts4j.core.event.impl.WebsocketCloseEvent;
+import dev.adlin.vts4j.core.event.impl.WebsocketOpenEvent;
+import dev.adlin.vts4j.core.network.NetworkHandler;
 import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.Response;
 import dev.adlin.vts4j.core.event.*;
-import dev.adlin.vts4j.core.socket.ClientSocket;
-import dev.adlin.vts4j.exception.APIErrorException;
+import dev.adlin.vts4j.core.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class VTSClient {
 
-    private final ClientSocket socket;
-    private final Gson gson = new Gson();
-
-    private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
-    private final EventHandler eventHandler = new EventHandler();
+    private final NetworkHandler networkHandler;
+    private final RequestDispatcher requestDispatcher;
+    private final EventHandler eventHandler;
+    private final MessageHandler messageHandler;
 
     public VTSClient(URI vtsAddress) {
-        this.socket = new ClientSocket(vtsAddress);
+        this.networkHandler = new NetworkHandler(vtsAddress);
+        this.eventHandler = new EventHandler();
+        this.requestDispatcher = new RequestDispatcher(networkHandler);
 
-        socket.setOpenHandler(serverHandshake -> System.out.println("Connection opened"));
+        this.messageHandler = new MessageHandler(requestDispatcher, eventHandler);
 
-        socket.setMessageHandler(message -> {
-            Response response = parseResponse(message);
-
-            String requestId = response.getRequestId();
-            // Check message if is a response to request
-            if (isResponseToRequest(requestId)) {
-                handlePendingRequest(response);
-                return;
-            }
-
-            // if this message not a response check may be this message is event
-            handleEventMessage(response);
+        networkHandler.setMessageHandler(messageHandler);
+        networkHandler.onOpen(handshake -> {
+            WebsocketOpenEvent event = new WebsocketOpenEvent(handshake);
+            eventHandler.callEvent(event);
         });
+        networkHandler.onClose(closeReason -> {
+            requestDispatcher.closeAll();
 
-        socket.setCloseHandler(closeReason -> {
-            pendingRequests.forEach((id, future) -> future.completeExceptionally(
-                    new RuntimeException("Connection closed")
-            ));
-            pendingRequests.clear();
+            WebsocketCloseEvent event = new WebsocketCloseEvent(closeReason);
+            eventHandler.callEvent(event);
         });
-
-        socket.setErrorHandler(Throwable::printStackTrace);
-    }
-
-    private boolean isResponseToRequest(String requestId) {
-        return pendingRequests.containsKey(requestId);
-    }
-
-    private void handlePendingRequest(Response response) {
-        CompletableFuture<Response> future = pendingRequests.remove(response.getRequestId());
-        if (future == null) return;
-
-        if (response.getMessageType().equals("APIError")) {
-            final APIErrorException exception = new APIErrorException(
-                    response.getData().get("message").getAsString(),
-                    response.getData().get("errorID").getAsInt());
-
-            future.completeExceptionally(exception);
-            throw exception;
-        }
-
-        future.complete(response);
-    }
-
-    private void handleEventMessage(Response response) {
-        Class<? extends Event> eventClass = EventRegistry.getEventClass(response.getMessageType());
-        if (eventClass == null)
-            throw new NullPointerException("Event type is null");
-
-        Event event = gson.fromJson(response.getData(), eventClass);
-        eventHandler.callEvent(event);
     }
 
     public VTSClient() {
@@ -86,23 +48,23 @@ public class VTSClient {
     }
 
     public void connect(){
-        this.socket.connect();
+        networkHandler.connect();
     }
 
-    public void connectBlocking() throws InterruptedException{
-        this.socket.connectBlocking();
+    public void awaitConnect() {
+        networkHandler.awaitConnect();
     }
 
-    public void connectBlocking(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        this.socket.connectBlocking(timeout, timeUnit);
+    public void awaitConnect(long timeout, TimeUnit timeUnit) {
+        networkHandler.awaitConnect(timeout, timeUnit);
     }
 
     public void disconnect() {
-        this.socket.close();
+        networkHandler.disconnect();
     }
 
-    public void disconnectBlocking() throws InterruptedException {
-        this.socket.closeBlocking();
+    public void disconnectBlocking() {
+        networkHandler.awaitDisconnect();
     }
 
     /**
@@ -145,24 +107,14 @@ public class VTSClient {
     }
 
     /**
-     * Sends a request to the server and returns a CompletableFuture to handle the response.
+     * Sends a request to the server and returns a CompletableFuture to dispatch the response.
      * The request is converted to JSON format and sent via a socket.
      * The returned CompletableFuture can be used to obtain the server's response once it is available.
      * @param request object to be sent to the server. This object will be serialized to JSON
      * @return response from the server
      */
     public CompletableFuture<Response> sendRequest(Request request) {
-        CompletableFuture<Response> future = new CompletableFuture<>();
-        this.pendingRequests.put(request.getRequestId(), future);
-
-        try {
-            this.socket.send(gson.toJson(request, Request.class));
-        } catch (Exception e) {
-            pendingRequests.remove(request.getRequestId());
-            future.completeExceptionally(e);
-        }
-
-        return future;
+        return requestDispatcher.send(request);
     }
 
     /**
@@ -231,9 +183,4 @@ public class VTSClient {
     public void registerEventListener(Listener listener) {
         eventHandler.registerListener(listener);
     }
-
-    private Response parseResponse(String json) {
-        return gson.fromJson(json, Response.class);
-    }
-
 }

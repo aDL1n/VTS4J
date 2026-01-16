@@ -73,6 +73,7 @@ public class Response {
     public JsonObject getData() {
         return data;
     }
+
     @Override
     public String toString() {
         return "[apiName=%s, apiVersion=%s, timestamp=%d, messageType=%s, requestId=%s, data=%s]"

@@ -1,4 +1,4 @@
-package dev.adlin.vts4j.core.socket;
+package dev.adlin.vts4j.core.network.socket;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
