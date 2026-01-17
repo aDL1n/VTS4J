@@ -19,7 +19,7 @@ public class ClientTest {
     }
 
     public VTSClient createAndConnectClient() {
-        VTSClient client = new VTSClient();
+        VTSClient client = VTSClientBuilder.create().build();
         client.awaitConnect();
 
         return client;
@@ -27,7 +27,7 @@ public class ClientTest {
 
     @Test
     public void connectionTest() {
-        VTSClient client = new VTSClient();
+        VTSClient client = VTSClientBuilder.create().build();
 
         client.awaitConnect();
     }

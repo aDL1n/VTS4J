@@ -1,10 +1,6 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.core.MessageHandler;
-import dev.adlin.vts4j.core.event.impl.WebsocketCloseEvent;
-import dev.adlin.vts4j.core.event.impl.WebsocketErrorEvent;
-import dev.adlin.vts4j.core.event.impl.WebsocketOpenEvent;
 import dev.adlin.vts4j.core.network.NetworkHandler;
 import dev.adlin.vts4j.core.request.Request;
 import dev.adlin.vts4j.core.Response;
@@ -13,45 +9,19 @@ import dev.adlin.vts4j.core.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class VTSClient {
 
     private final NetworkHandler networkHandler;
-    private final RequestDispatcher requestDispatcher;
     private final EventHandler eventHandler;
-    private final MessageHandler messageHandler;
+    private final RequestDispatcher requestDispatcher;
 
-    protected VTSClient(URI vtsAddress) {
-        this.networkHandler = new NetworkHandler(vtsAddress);
-        this.eventHandler = new EventHandler();
-        this.requestDispatcher = new RequestDispatcher(networkHandler);
-        this.messageHandler = new MessageHandler(requestDispatcher, eventHandler);
-
-        networkHandler.setMessageHandler(messageHandler);
-
-        networkHandler.onOpen(handshake -> {
-            WebsocketOpenEvent event = new WebsocketOpenEvent(handshake);
-            eventHandler.callEvent(event);
-        });
-
-        networkHandler.onClose(closeReason -> {
-            requestDispatcher.closeAll();
-
-            WebsocketCloseEvent event = new WebsocketCloseEvent(closeReason);
-            eventHandler.callEvent(event);
-        });
-
-        networkHandler.setErrorHandler(exception -> {
-            WebsocketErrorEvent event = new WebsocketErrorEvent(exception);
-            eventHandler.callEvent(event);
-        });
-    }
-
-    public VTSClient() {
-        this(URI.create("ws://localhost:8001"));
+    protected VTSClient(NetworkHandler networkHandler, EventHandler eventHandler, RequestDispatcher requestDispatcher) {
+        this.networkHandler = networkHandler;
+        this.eventHandler = eventHandler;
+        this.requestDispatcher = requestDispatcher;
     }
 
     public VTSClient connect(){
