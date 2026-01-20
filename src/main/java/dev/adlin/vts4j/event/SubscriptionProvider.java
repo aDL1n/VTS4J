@@ -1,0 +1,46 @@
+package dev.adlin.vts4j.event;
+
+import com.google.gson.JsonObject;
+import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.entity.Response;
+import dev.adlin.vts4j.request.RequestDispatcher;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+
+public class SubscriptionProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionProvider.class);
+
+    private final RequestDispatcher requestDispatcher;
+
+    public SubscriptionProvider(RequestDispatcher requestDispatcher) {
+        this.requestDispatcher = requestDispatcher;
+    }
+
+    public CompletableFuture<Response> sendSubscribeRequest(
+            @NotNull Class<? extends Event> eventClass,
+            @Nullable JsonObject config,
+            boolean subscribe
+    ) {
+        logger.trace("Sending subscription request");
+
+        if (!EventRegistry.exists(eventClass))
+            throw new IllegalArgumentException("Invalid event name");
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("eventName", EventRegistry.getName(eventClass));
+        payload.addProperty("subscribe", subscribe);
+        if (config != null) payload.add("config", config);
+
+        Request sibscribeEventRequest = new Request.Builder()
+                .setMessageType("EventSubscriptionRequest")
+                .setPayload(payload)
+                .build();
+
+        return requestDispatcher.send(sibscribeEventRequest);
+    }
+}

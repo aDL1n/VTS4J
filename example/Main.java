@@ -1,20 +1,22 @@
 package example;
 
-
-import dev.adlin.vts4j.core.event.EventListener;
-import dev.adlin.vts4j.core.event.EventPriority;
-import dev.adlin.vts4j.core.event.Listener;
-import dev.adlin.vts4j.core.hotkey.HotkeyManager;
-import dev.adlin.vts4j.core.request.Request;
-import dev.adlin.vts4j.core.event.impl.TestEvent;
-import dev.adlin.vts4j.core.request.RequestType;
-import dev.adlin.vts4j.VTSClientBuilder;
+import ch.qos.logback.classic.Level;
+import dev.adlin.vts4j.PluginMeta;
 import dev.adlin.vts4j.VTSClient;
+import dev.adlin.vts4j.VTSClientBuilder;
+import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.event.EventListener;
+import dev.adlin.vts4j.event.EventPriority;
+import dev.adlin.vts4j.event.Listener;
+import dev.adlin.vts4j.event.impl.TestEvent;
+import dev.adlin.vts4j.hotkey.HotkeyManager;
+import dev.adlin.vts4j.request.RequestType;
 
 public class Main {
     public static void main(String[] args){
         VTSClient vtsClient = VTSClientBuilder.create()
                 .registerListeners(new TestListener())
+                .setLoggingLevel(Level.TRACE)
                 .build()
                 .awaitConnect();
 
