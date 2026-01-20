@@ -4,7 +4,7 @@ import dev.adlin.vts4j.api.PluginMeta;
 import dev.adlin.vts4j.api.VTSClient;
 import dev.adlin.vts4j.api.VTSClientBuilder;
 import dev.adlin.vts4j.api.event.impl.TestEvent;
-import dev.adlin.vts4j.api.request.Request;
+import dev.adlin.vts4j.api.entity.Request;
 import dev.adlin.vts4j.api.request.RequestType;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
 import org.junit.jupiter.api.BeforeEach;

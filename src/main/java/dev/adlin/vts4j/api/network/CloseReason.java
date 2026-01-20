@@ -21,14 +21,12 @@ public class CloseReason {
         return code;
     }
 
-
     /**
      * @return reason for closing the connection
      */
     public String getReason() {
         return reason;
     }
-
 
     /**
      * @return bool indicating whether it was called by the server or the client

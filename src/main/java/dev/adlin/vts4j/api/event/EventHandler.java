@@ -1,10 +1,8 @@
-package dev.adlin.vts4j.impl.event;
+package dev.adlin.vts4j.api.event;
 
-import dev.adlin.vts4j.api.event.Event;
-import dev.adlin.vts4j.api.event.EventListener;
-import dev.adlin.vts4j.api.event.EventPriority;
-import dev.adlin.vts4j.api.event.Listener;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -13,9 +11,14 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class EventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+
     private final Map<Class<? extends Event>, List<ListenerContainer>> events = new HashMap<>();
 
     public void callEvent(Event event) {
+        logger.trace("Event called: {}", event.getClass().getName());
+
         if (eventsRegisteredForType(event.getClass())) {
             List<ListenerContainer> eventListeners = new ArrayList<>(events.get(event.getClass()));
 
@@ -44,16 +47,16 @@ public class EventHandler {
                 try {
                     eventMethod.method.invoke(eventMethod.parent, event);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    logger.error("Failed to register method of event: {}", e.getMessage());
                 }
             };
 
             ListenerContainer container = new ListenerContainer(eventMethod.eventType, listener, eventMethod.priority);
-            this.registerListener(container);
+            this.registerListenerContainer(container);
         }
     }
 
-    private void registerListener(ListenerContainer container) {
+    private void registerListenerContainer(ListenerContainer container) {
         if (!eventsRegisteredForType(container.eventType)) {
             events.put(container.eventType, new ArrayList<>());
         }
@@ -76,7 +79,7 @@ public class EventHandler {
 
     private boolean hasEventListenerAnnotation(EventMethod eventMethod) {
         for (Annotation annotation : eventMethod.annotations) {
-            if (annotation instanceof dev.adlin.vts4j.api.event.EventListener) return true;
+            if (annotation instanceof EventListener) return true;
         }
 
         return false;

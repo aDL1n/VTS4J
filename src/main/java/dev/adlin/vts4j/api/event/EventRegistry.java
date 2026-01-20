@@ -1,8 +1,7 @@
-package dev.adlin.vts4j.impl.event;
+package dev.adlin.vts4j.api.event;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import dev.adlin.vts4j.api.event.Event;
 import dev.adlin.vts4j.api.event.impl.*;
 import org.jetbrains.annotations.Nullable;
 

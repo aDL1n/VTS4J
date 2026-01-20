@@ -1,7 +1,5 @@
-package dev.adlin.vts4j.impl.network;
+package dev.adlin.vts4j.api.network;
 
-import dev.adlin.vts4j.api.network.SocketClient;
-import dev.adlin.vts4j.api.network.CloseReason;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;

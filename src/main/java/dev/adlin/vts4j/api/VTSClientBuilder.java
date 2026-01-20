@@ -1,14 +1,13 @@
 package dev.adlin.vts4j.api;
 
-import dev.adlin.vts4j.impl.event.EventHandler;
+import dev.adlin.vts4j.api.event.EventHandler;
 import dev.adlin.vts4j.api.event.Listener;
 import dev.adlin.vts4j.api.event.impl.WebsocketCloseEvent;
 import dev.adlin.vts4j.api.event.impl.WebsocketErrorEvent;
 import dev.adlin.vts4j.api.event.impl.WebsocketOpenEvent;
-import dev.adlin.vts4j.impl.network.NetworkClient;
-import dev.adlin.vts4j.impl.request.MessageHandler;
-import dev.adlin.vts4j.impl.request.RequestDispatcher;
-import dev.adlin.vts4j.impl.VTSClientImpl;
+import dev.adlin.vts4j.api.network.NetworkClient;
+import dev.adlin.vts4j.api.request.MessageHandler;
+import dev.adlin.vts4j.api.request.RequestDispatcher;
 
 import java.net.URI;
 import java.util.ArrayList;

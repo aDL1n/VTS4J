@@ -1,10 +1,10 @@
-package dev.adlin.vts4j.impl.request;
+package dev.adlin.vts4j.api.request;
 
 import com.google.gson.Gson;
-import dev.adlin.vts4j.api.response.Response;
+import dev.adlin.vts4j.api.entity.Request;
+import dev.adlin.vts4j.api.entity.Response;
 import dev.adlin.vts4j.api.exception.APIErrorException;
-import dev.adlin.vts4j.api.request.Request;
-import dev.adlin.vts4j.impl.network.NetworkClient;
+import dev.adlin.vts4j.api.network.NetworkClient;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;

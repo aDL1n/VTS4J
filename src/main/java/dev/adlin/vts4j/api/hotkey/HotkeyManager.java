@@ -2,9 +2,9 @@ package dev.adlin.vts4j.api.hotkey;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.api.response.Response;
+import dev.adlin.vts4j.api.entity.Response;
 import dev.adlin.vts4j.api.VTSClient;
-import dev.adlin.vts4j.api.request.Request;
+import dev.adlin.vts4j.api.entity.Request;
 import dev.adlin.vts4j.api.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

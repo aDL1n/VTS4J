@@ -3,8 +3,8 @@ package dev.adlin.vts4j.api;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.api.event.Event;
 import dev.adlin.vts4j.api.event.Listener;
-import dev.adlin.vts4j.api.request.Request;
-import dev.adlin.vts4j.api.response.Response;
+import dev.adlin.vts4j.api.entity.Request;
+import dev.adlin.vts4j.api.entity.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +28,8 @@ public interface VTSClient {
      * @param pluginMeta
      */
     void authenticate(PluginMeta pluginMeta);
+
+    void authenticate(PluginMeta pluginMeta, String authToken);
 
     /**
      * Sends a request to the server and returns a CompletableFuture to dispatch the response.

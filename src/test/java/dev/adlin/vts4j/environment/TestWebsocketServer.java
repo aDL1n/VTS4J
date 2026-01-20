@@ -2,7 +2,7 @@ package dev.adlin.vts4j.environment;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.core.request.Request;
+import dev.adlin.vts4j.api.entity.Request;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;

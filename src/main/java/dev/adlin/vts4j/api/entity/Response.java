@@ -1,4 +1,4 @@
-package dev.adlin.vts4j.api.response;
+package dev.adlin.vts4j.api.entity;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
