@@ -3,6 +3,7 @@ package dev.adlin.vts4j;
 import ch.qos.logback.classic.Level;
 import dev.adlin.vts4j.event.impl.TestEvent;
 import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,8 +42,8 @@ public class ClientTest {
 
     @Test
     public void testRequest() {
-        Request request = new Request.Builder()
-                .setMessageType(RequestType.API_STATE_BROADCAST)
+        Request request = RequestBuilder
+                .of(RequestType.API_STATE_BROADCAST)
                 .build();
 
         client.sendRequest(request).join();

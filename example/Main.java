@@ -10,6 +10,7 @@ import dev.adlin.vts4j.event.EventPriority;
 import dev.adlin.vts4j.event.Listener;
 import dev.adlin.vts4j.event.impl.TestEvent;
 import dev.adlin.vts4j.hotkey.HotkeyManager;
+import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 
 public class Main {
@@ -23,11 +24,9 @@ public class Main {
         PluginMeta pluginMeta = new PluginMeta("Example", "test");
         vtsClient.authenticate(pluginMeta);
 
-        vtsClient.sendRequest(
-                new Request.Builder()
-                        .setMessageType(RequestType.API_STATE)
-                        .build()
-        ).thenAccept(System.out::println);
+        Request apiStateRequest = RequestBuilder.of(RequestType.API_STATE).build();
+        vtsClient.sendRequest(apiStateRequest)
+                .thenAccept(System.out::println);
 
         vtsClient.subscribe(TestEvent.class);
 

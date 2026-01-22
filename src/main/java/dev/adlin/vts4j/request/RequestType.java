@@ -38,7 +38,8 @@ public enum RequestType {
     ART_MESH_SELECTION("ArtMeshSelectionRequest"),
     ITEM_PIN("ItemPinRequest"),
     POST_PROCESSING_LIST("PostProcessingListRequest"),
-    POST_PROCESSING_UPDATE("PostProcessingUpdateRequest");
+    POST_PROCESSING_UPDATE("PostProcessingUpdateRequest"),
+    EVENT_SUBSCRIPTION("EventSubscriptionRequest");
 
 
     private final String requestName;
@@ -47,10 +48,8 @@ public enum RequestType {
         this.requestName = requestName;
     }
 
-    /**
-     * @return Request name
-     */
-    public String getRequestName() {
+    @Override
+    public String toString() {
         return requestName;
     }
 }

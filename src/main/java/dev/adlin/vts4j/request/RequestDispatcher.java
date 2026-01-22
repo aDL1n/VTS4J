@@ -28,13 +28,13 @@ public class RequestDispatcher {
         logger.trace("Sending request");
 
         CompletableFuture<Response> future = new CompletableFuture<>();
-        this.pendingRequests.put(request.getRequestId(), future);
+        this.pendingRequests.put(request.getId(), future);
 
         String payload = gson.toJson(request, Request.class);
         try {
             this.networkClient.send(payload);
         } catch (Exception exception) {
-            handleException(request.getRequestId(), exception);
+            handleException(request.getId(), exception);
         }
 
         return future;
@@ -62,7 +62,7 @@ public class RequestDispatcher {
     }
 
     private boolean isErrorResponse(Response response) {
-        return "APIError".equals(response.getMessageType());
+        return "APIError".equals(response.getRequestType());
     }
 
     private void handleErrorResponse(CompletableFuture<Response> future, Response response) {

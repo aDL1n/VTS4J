@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.adlin.vts4j.PluginMeta;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
+import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +64,7 @@ public class AuthenticationProvider {
         logger.trace("Sending auth request: {}", requestType);
 
         return requestDispatcher.send(
-                new Request.Builder()
-                        .setMessageType(requestType)
+                RequestBuilder.of(requestType)
                         .setPayload(payload)
                         .build()
         );

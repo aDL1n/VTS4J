@@ -32,7 +32,7 @@ public class MessageHandler implements Consumer<String> {
 
         if (requestDispatcher.contains(responseId)) {
             requestDispatcher.dispatch(response);
-        } else if (EventRegistry.exists(response.getMessageType())) {
+        } else if (EventRegistry.exists(response.getRequestType())) {
             handleEvent(response);
         }
     }
@@ -52,8 +52,12 @@ public class MessageHandler implements Consumer<String> {
     }
 
     private void tryHandleEvent(Response response) {
-        String messageType = response.getMessageType();
-        Event event = gson.fromJson(response.getData(), EventRegistry.getEventClass(messageType));
+        String requestType = response.getRequestType();
+
+        Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
+        if (eventClass == null) throw new IllegalStateException("Event class not found!");
+
+        Event event = gson.fromJson(response.getData(), eventClass);
 
         eventHandler.callEvent(event);
     }

@@ -14,17 +14,17 @@ public class Response {
     @SerializedName("timestamp")
     private long timestamp;
     @SerializedName("messageType")
-    private String messageType;
+    private String requestType;
     @SerializedName("requestID")
     private String requestId;
     @SerializedName("data")
     private JsonObject data;
 
-    public Response(String apiName, String apiVersion, long timestamp, String messageType, String requestId, JsonObject data) {
+    public Response(String apiName, String apiVersion, long timestamp, String requestType, String requestId, JsonObject data) {
         this.apiName = apiName;
         this.apiVersion = apiVersion;
         this.timestamp = timestamp;
-        this.messageType = messageType;
+        this.requestType = requestType;
         this.requestId = requestId;
         this.data = data;
     }
@@ -53,11 +53,8 @@ public class Response {
         return timestamp;
     }
 
-    /**
-     * @return The type of the message.
-     */
-    public String getMessageType() {
-        return messageType;
+    public String getRequestType() {
+        return requestType;
     }
 
     /**
@@ -76,7 +73,7 @@ public class Response {
 
     @Override
     public String toString() {
-        return "[apiName=%s, apiVersion=%s, timestamp=%d, messageType=%s, requestId=%s, data=%s]"
-                .formatted(apiName, apiVersion, timestamp, messageType, requestId, data);
+        return "[apiName=%s, apiVersion=%s, timestamp=%d, requestType=%s, requestId=%s, data=%s]"
+                .formatted(apiName, apiVersion, timestamp, requestType, requestId, data);
     }
 }

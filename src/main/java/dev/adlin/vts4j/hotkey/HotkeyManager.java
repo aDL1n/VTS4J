@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.VTSClient;
 import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,9 +44,10 @@ public class HotkeyManager {
     }
 
     private List<Hotkey> fetchHotkeys() {
-        Response response = client.sendRequest(new Request.Builder()
-                .setMessageType(RequestType.HOTKEYS_IN_CURRENT_MODEL)
-                .build()).join();
+        Response response = client.sendRequest(
+                RequestBuilder
+                        .of(RequestType.HOTKEYS_IN_CURRENT_MODEL)
+                        .build()).join();
 
         JsonObject responseData = response.getData();
         return responseData.getAsJsonArray("availableHotkeys").asList().stream()
@@ -62,8 +64,7 @@ public class HotkeyManager {
         JsonObject payload = new JsonObject();
         payload.addProperty("hotkeyID", hotkey.id());
 
-        this.client.sendRequest(new Request.Builder()
-                .setMessageType(RequestType.HOTKEY_TRIGGER)
+        this.client.sendRequest(RequestBuilder.of(RequestType.HOTKEY_TRIGGER)
                 .setPayload(payload)
                 .build()
         );
@@ -95,9 +96,8 @@ public class HotkeyManager {
      * Returns the hotkey with the specified name.
      *
      * @param hotkeyName The name of the hotkey to retrieve.
-     * @return The Hotkey object with the specified name, or null if not found.
+     * @return optional with Hotkey object, or null if not found.
      */
-    @Nullable
     public Optional<Hotkey> findByName(String hotkeyName) {
         return cachedHotkeys.values().stream()
                 .filter(hotkey -> hotkey.name().equals(hotkeyName))

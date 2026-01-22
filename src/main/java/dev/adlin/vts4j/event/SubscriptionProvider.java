@@ -3,7 +3,9 @@ package dev.adlin.vts4j.event;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
+import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
+import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -36,8 +38,7 @@ public class SubscriptionProvider {
         payload.addProperty("subscribe", subscribe);
         if (config != null) payload.add("config", config);
 
-        Request sibscribeEventRequest = new Request.Builder()
-                .setMessageType("EventSubscriptionRequest")
+        Request sibscribeEventRequest = RequestBuilder.of(RequestType.EVENT_SUBSCRIPTION)
                 .setPayload(payload)
                 .build();
 
