@@ -67,7 +67,7 @@ public class TestWebsocketServer extends WebSocketServer {
         payload.addProperty("instanceID", "93aa0d0494304fddb057ae8a295c4e59");
         payload.addProperty("windowTitle", "Test");
 
-        JsonObject response = generateResponseTemplate(requestId, "APIStateRequest");
+        JsonObject response = generateResponseTemplate(requestId, "VTubeStudioAPIStateBroadcast");
         response.add("data", payload);
 
         return response;

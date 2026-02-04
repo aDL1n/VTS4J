@@ -2,6 +2,7 @@ package dev.adlin.vts4j;
 
 import ch.qos.logback.classic.Level;
 import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
 import dev.adlin.vts4j.event.impl.TestEvent;
 import dev.adlin.vts4j.request.RequestBuilder;
@@ -49,7 +50,9 @@ class ClientTest {
                 .of(RequestType.API_STATE_BROADCAST)
                 .build();
 
-        Assertions.assertEquals(vtsClient.sendRequest(request).join().getRequestType(), request.getType());
+        final Response response = vtsClient.sendRequest(request).join();
+
+        Assertions.assertEquals(response.getRequestType(), request.getType());
     }
 
     @Test

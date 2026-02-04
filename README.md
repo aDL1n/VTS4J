@@ -8,6 +8,6 @@ Lightweight Java library for VTube Studio API
 <dependency>
   <groupId>dev.adlin</groupId>
   <artifactId>vts4j</artifactId>
-  <version>1.2.3</version>
+  <version>1.3.1</version>
 </dependency>
 ```
