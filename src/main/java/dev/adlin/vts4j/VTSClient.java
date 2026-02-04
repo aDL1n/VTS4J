@@ -26,8 +26,9 @@ public interface VTSClient {
     /**
      * Sends an authentication request with the specified plugin name and author.
      * @param pluginMeta
+     * @return authentication token
      */
-    void authenticate(final @NotNull PluginMeta pluginMeta);
+    @NotNull String authenticate(final @NotNull PluginMeta pluginMeta);
 
     void authenticate(final @NotNull PluginMeta pluginMeta, final @NotNull String authToken);
 

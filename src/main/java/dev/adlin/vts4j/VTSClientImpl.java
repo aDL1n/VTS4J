@@ -26,7 +26,11 @@ public class VTSClientImpl implements VTSClient {
     private final AuthenticationProvider authenticationProvider;
     private final SubscriptionProvider subscriptionProvider;
 
-    protected VTSClientImpl(NetworkClient networkClient, EventHandler eventHandler, RequestDispatcher requestDispatcher) {
+    protected VTSClientImpl(
+            final @NotNull NetworkClient networkClient,
+            final @NotNull EventHandler eventHandler,
+            final @NotNull RequestDispatcher requestDispatcher
+    ) {
         this.networkClient = networkClient;
         this.eventHandler = eventHandler;
         this.requestDispatcher = requestDispatcher;
@@ -37,68 +41,74 @@ public class VTSClientImpl implements VTSClient {
 
     @Override
     public VTSClient connect(){
-        networkClient.connect();
+        this.networkClient.connect();
         return this;
     }
 
     @Override
     public VTSClient awaitConnect() {
-        networkClient.awaitConnect();
+        this.networkClient.awaitConnect();
         return this;
     }
 
     @Override
-    public void awaitConnect(long timeout, @NonNull TimeUnit timeUnit) {
-        networkClient.awaitConnect(timeout, timeUnit);
+    public void awaitConnect(long timeout, final @NonNull TimeUnit timeUnit) {
+        this.networkClient.awaitConnect(timeout, timeUnit);
     }
 
     @Override
     public void disconnect() {
-        networkClient.disconnect();
+        this.networkClient.disconnect();
     }
 
     @Override
     public void disconnectBlocking() {
-        networkClient.awaitDisconnect();
+        this.networkClient.awaitDisconnect();
     }
 
     @Override
-    public void authenticate(@NonNull PluginMeta pluginMeta) {
-        authenticationProvider.authenticateWithNewToken(pluginMeta);
+    public @NotNull String authenticate(final @NonNull PluginMeta pluginMeta) {
+        return this.authenticationProvider.authenticateWithNewToken(pluginMeta);
     }
 
     @Override
-    public void authenticate(@NonNull PluginMeta pluginMeta, @NonNull String authToken) {
-        authenticationProvider.authenticateWithExistingToken(pluginMeta, authToken);
+    public void authenticate(final @NonNull PluginMeta pluginMeta, final @NonNull String authToken) {
+        this.authenticationProvider.authenticateWithExistingToken(pluginMeta, authToken);
     }
 
     @Override
-    public CompletableFuture<Response> sendRequest(@NonNull Request request) {
-        return requestDispatcher.send(request);
+    public CompletableFuture<Response> sendRequest(final @NonNull Request request) {
+        return this.requestDispatcher.send(request);
     }
 
     @Override
-    public CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+    public CompletableFuture<Response> subscribe(
+            final @NotNull Class<? extends Event> eventClass,
+            final @Nullable JsonObject eventConfig
+    ) {
         return this.subscriptionProvider.sendSubscribeRequest(eventClass, eventConfig, true);
     }
 
     @Override
-    public CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass) {
+    public CompletableFuture<Response> subscribe(final @NotNull Class<? extends Event> eventClass) {
         return this.subscribe(eventClass, null);
     }
 
     @Override
-    public CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig) {
+    public CompletableFuture<Response> unsubscribe(
+            final @NotNull Class<? extends Event> eventClass,
+            final @Nullable JsonObject eventConfig
+    ) {
         return this.subscriptionProvider.sendSubscribeRequest(eventClass, eventConfig, false);
     }
 
     @Override
-    public CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass) {
+    public CompletableFuture<Response> unsubscribe(final @NotNull Class<? extends Event> eventClass) {
         return this.unsubscribe(eventClass, null);
     }
 
     @Override
-    public void registerEventListener(@NonNull Listener listener) {
-        eventHandler.registerListener(listener);
+    public void registerEventListener(final @NonNull Listener listener) {
+        this.eventHandler.registerListener(listener);
     }
 }

@@ -37,8 +37,8 @@ public class TestWebsocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         Request request = parseRequest(message);
 
-        String requestType = request.getMessageType();
-        String requestId = request.getRequestId();
+        String requestType = request.getType();
+        String requestId = request.getId();
 
         JsonObject response = null;
 
@@ -46,7 +46,7 @@ public class TestWebsocketServer extends WebSocketServer {
             case "AuthenticationTokenRequest" -> response = generateAuthenticationTokenResponse(requestId);
             case "AuthenticationRequest" -> {
                 if (!checkAuthenticationToken(request)) return;
-                response = generateAuthenticationResponse(requestId, request.getPayload());
+                response = generateAuthenticationResponse(requestId);
                 authenticatedSockets.add(conn);
             }
             case "VTubeStudioAPIStateBroadcast" -> response = generateApiStateResponse(requestId);
@@ -57,8 +57,7 @@ public class TestWebsocketServer extends WebSocketServer {
     }
 
     private JsonObject generateEventSubscriptionResponse(String requestId) {
-        JsonObject response = generateResponseTemplate(requestId, "EventSubscriptionResponse");
-        return response;
+        return this.generateResponseTemplate(requestId, "EventSubscriptionResponse");
     }
 
     private JsonObject generateApiStateResponse(String requestId) {
@@ -74,7 +73,7 @@ public class TestWebsocketServer extends WebSocketServer {
         return response;
     }
 
-    private JsonObject generateAuthenticationResponse(String requestId, JsonObject requestPayload) {
+    private JsonObject generateAuthenticationResponse(String requestId) {
         JsonObject payload = new JsonObject();
         payload.addProperty("authenticated", true);
         payload.addProperty("reason", "Token valid. The plugin is authenticated for the duration of this session.");
@@ -87,7 +86,7 @@ public class TestWebsocketServer extends WebSocketServer {
 
     private JsonObject generateAuthenticationTokenResponse(String requestId) {
         JsonObject payload = new JsonObject();
-        payload.addProperty("authenticationToken", authenticationToken.toString());
+        payload.addProperty("authenticationToken", authenticationToken);
 
         JsonObject response = generateResponseTemplate(requestId, "AuthenticationTokenResponse");
         response.add("data", payload);
