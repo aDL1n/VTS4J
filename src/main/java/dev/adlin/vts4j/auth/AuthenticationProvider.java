@@ -2,10 +2,10 @@ package dev.adlin.vts4j.auth;
 
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.PluginMeta;
-import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +13,15 @@ import java.util.concurrent.CompletableFuture;
 
 public class AuthenticationProvider {
 
-    private final static Logger logger = LoggerFactory.getLogger(AuthenticationProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationProvider.class);
     private final RequestDispatcher requestDispatcher;
 
-    public AuthenticationProvider(RequestDispatcher dispatcher) {
+    public AuthenticationProvider(final @NotNull RequestDispatcher dispatcher) {
         this.requestDispatcher = dispatcher;
     }
 
-    public String authenticateWithNewToken(PluginMeta pluginMeta) {
-        logger.info("Requesting authenticate with new token");
+    public String authenticateWithNewToken(final @NotNull PluginMeta pluginMeta) {
+        LOGGER.info("Requesting authenticate with new token");
 
         String token = requestToken(pluginMeta);
         authenticateWithExistingToken(pluginMeta, token);
@@ -29,8 +29,8 @@ public class AuthenticationProvider {
         return token;
     }
 
-    public void authenticateWithExistingToken(PluginMeta pluginMeta, String token) {
-        logger.trace("Requesting authenticate");
+    public void authenticateWithExistingToken(final @NotNull PluginMeta pluginMeta, final @NotNull String token) {
+        LOGGER.trace("Requesting authenticate");
 
         JsonObject payload = new JsonObject();
         payload.addProperty("pluginName", pluginMeta.name());
@@ -44,7 +44,7 @@ public class AuthenticationProvider {
     }
 
     private String requestToken(PluginMeta pluginMeta) {
-        logger.trace("Sending token request");
+        LOGGER.trace("Sending token request");
 
         JsonObject payload = new JsonObject();
         payload.addProperty("pluginName", pluginMeta.name());
@@ -61,7 +61,7 @@ public class AuthenticationProvider {
     }
 
     private CompletableFuture<Response> sendAuthRequest(String requestType, JsonObject payload) {
-        logger.trace("Sending auth request: {}", requestType);
+        LOGGER.trace("Sending auth request: {}", requestType);
 
         return requestDispatcher.send(
                 RequestBuilder.of(requestType)

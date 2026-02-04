@@ -1,5 +1,6 @@
 package dev.adlin.vts4j.event;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +13,15 @@ import java.util.function.Consumer;
 
 public class EventHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
 
     private final Map<Class<? extends Event>, List<ListenerContainer>> events = new HashMap<>();
 
-    public void callEvent(Event event) {
-        logger.trace("Event called: {}", event.getClass().getName());
+    public void callEvent(final @NotNull Event event) {
+        LOGGER.trace("Event called: {}", event.getClass().getName());
 
         if (eventsRegisteredForType(event.getClass())) {
-            List<ListenerContainer> eventListeners = new ArrayList<>(events.get(event.getClass()));
+            final List<ListenerContainer> eventListeners = new ArrayList<>(this.events.get(event.getClass()));
 
             eventListeners.sort((l1, l2) -> {
                 if (l1.priority().getId() < l2.priority().getId())
@@ -37,36 +38,42 @@ public class EventHandler {
         }
     }
 
-    public void registerListener(Listener listenerClass) {
+    public void registerListener(final @NotNull Listener listenerClass) {
         this.registerListenerMethods(this.getEventMethods(listenerClass));
     }
 
-    private void registerListenerMethods(List<EventMethod> eventMethods) {
-        logger.trace("Registering listener methods");
+    private void registerListenerMethods(final @NotNull List<EventMethod> eventMethods) {
+        LOGGER.trace("Registering listener methods");
 
         for (EventMethod eventMethod : eventMethods) {
-            Consumer<Event> listener = (event) -> {
+            final Consumer<Event> listener = event -> {
                 try {
                     eventMethod.method.invoke(eventMethod.parent, event);
                 } catch (Exception e) {
-                    logger.error("Failed to register method of event: {}", e.getMessage());
+                    LOGGER.error("Failed to register method of event: {}", e.getMessage());
                 }
             };
 
-            ListenerContainer container = new ListenerContainer(eventMethod.eventType, listener, eventMethod.priority);
+            final ListenerContainer container = new ListenerContainer(
+                    eventMethod.eventType,
+                    listener,
+                    eventMethod.priority
+            );
+
             this.registerListenerContainer(container);
         }
     }
 
-    private void registerListenerContainer(ListenerContainer container) {
-        if (!eventsRegisteredForType(container.eventType)) {
-            events.put(container.eventType, new ArrayList<>());
+    private void registerListenerContainer(final @NotNull ListenerContainer container) {
+        if (!this.eventsRegisteredForType(container.eventType)) {
+            this.events.put(container.eventType, new ArrayList<>());
         }
-        events.get(container.eventType).add(container);
+
+        this.events.get(container.eventType).add(container);
     }
 
-    private List<EventMethod> getEventMethods(Listener listenerClass) {
-        List<EventMethod> eventMethods = new ArrayList<>();
+    private @NotNull List<EventMethod> getEventMethods(final @NotNull Listener listenerClass) {
+        final List<EventMethod> eventMethods = new ArrayList<>();
 
         for (Method method : listenerClass.getClass().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers())) {
@@ -79,7 +86,7 @@ public class EventHandler {
         return eventMethods;
     }
 
-    private boolean hasEventListenerAnnotation(EventMethod eventMethod) {
+    private boolean hasEventListenerAnnotation(final @NotNull EventMethod eventMethod) {
         for (Annotation annotation : eventMethod.annotations) {
             if (annotation instanceof EventListener) return true;
         }
@@ -87,9 +94,7 @@ public class EventHandler {
         return false;
     }
 
-    private boolean eventsRegisteredForType(Class<? extends Event> eventType) {
-        if (eventType == null) return false;
-
+    private boolean eventsRegisteredForType(final @NotNull Class<? extends Event> eventType) {
         return events.containsKey(eventType);
     }
 

@@ -2,13 +2,11 @@ package dev.adlin.vts4j.hotkey;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.entity.Request;
+import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +20,12 @@ import java.util.stream.Collectors;
  */
 public class HotkeyManager {
 
+    private static final Gson GSON = new Gson();
+
     private final VTSClient client;
-    private final Gson gson = new Gson();
     private final ConcurrentHashMap<String, Hotkey> cachedHotkeys = new ConcurrentHashMap<>();
 
-    public HotkeyManager(VTSClient client) {
+    public HotkeyManager(final @NotNull VTSClient client) {
         this.client = client;
     }
 
@@ -36,22 +35,22 @@ public class HotkeyManager {
      * Call this method if hotkeys have been modified in the VTube Studio UI.
      */
     public void refresh() {
-        List<Hotkey> fetchedHotkeys = this.fetchHotkeys();
+        final List<Hotkey> fetchedHotkeys = this.fetchHotkeys();
 
-        cachedHotkeys.clear();
-        cachedHotkeys.putAll(fetchedHotkeys.stream().collect(
+        this.cachedHotkeys.clear();
+        this.cachedHotkeys.putAll(fetchedHotkeys.stream().collect(
                         Collectors.toMap(Hotkey::id, hotkey -> hotkey)));
     }
 
-    private List<Hotkey> fetchHotkeys() {
-        Response response = client.sendRequest(
+    private @NotNull List<Hotkey> fetchHotkeys() {
+        final Response response = client.sendRequest(
                 RequestBuilder
                         .of(RequestType.HOTKEYS_IN_CURRENT_MODEL)
                         .build()).join();
 
-        JsonObject responseData = response.getData();
+        final JsonObject responseData = response.getData();
         return responseData.getAsJsonArray("availableHotkeys").asList().stream()
-                .map(rawHotkey -> gson.fromJson(rawHotkey, Hotkey.class))
+                .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
                 .toList();
     }
 
@@ -60,8 +59,8 @@ public class HotkeyManager {
      *
      * @param hotkey The hotkey to be triggered. Cannot be null.
      */
-    public void trigger(@NotNull Hotkey hotkey) {
-        JsonObject payload = new JsonObject();
+    public void trigger(final @NotNull Hotkey hotkey) {
+        final JsonObject payload = new JsonObject();
         payload.addProperty("hotkeyID", hotkey.id());
 
         this.client.sendRequest(RequestBuilder.of(RequestType.HOTKEY_TRIGGER)
@@ -75,8 +74,8 @@ public class HotkeyManager {
      *
      * @param hotkeyName The name of the hotkey to be triggered. Cannot be null.
      */
-    public void trigger(@NotNull String hotkeyName) {
-        Optional<Hotkey> hotkey = this.findByName(hotkeyName);
+    public void trigger(final @NotNull String hotkeyName) {
+        final Optional<Hotkey> hotkey = this.findByName(hotkeyName);
         if (hotkey.isEmpty())
             throw new NullPointerException("Hotkey not found");
 
@@ -88,7 +87,7 @@ public class HotkeyManager {
      *
      * @return A Map containing the hotkeys.
      */
-    public Map<String, Hotkey> getHotkeys() {
+    public @NotNull Map<String, Hotkey> getHotkeys() {
         return Collections.unmodifiableMap(this.cachedHotkeys);
     }
 
@@ -98,8 +97,8 @@ public class HotkeyManager {
      * @param hotkeyName The name of the hotkey to retrieve.
      * @return optional with Hotkey object, or null if not found.
      */
-    public Optional<Hotkey> findByName(String hotkeyName) {
-        return cachedHotkeys.values().stream()
+    public @NotNull Optional<Hotkey> findByName(final @NotNull String hotkeyName) {
+        return this.cachedHotkeys.values().stream()
                 .filter(hotkey -> hotkey.name().equals(hotkeyName))
                 .findFirst();
     }

@@ -1,17 +1,18 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.JsonObject;
+import dev.adlin.vts4j.auth.AuthenticationProvider;
+import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
-import dev.adlin.vts4j.auth.AuthenticationProvider;
 import dev.adlin.vts4j.event.EventHandler;
 import dev.adlin.vts4j.event.Listener;
-import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.event.SubscriptionProvider;
-import dev.adlin.vts4j.request.RequestDispatcher;
 import dev.adlin.vts4j.network.NetworkClient;
+import dev.adlin.vts4j.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +48,7 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void awaitConnect(long timeout, TimeUnit timeUnit) {
+    public void awaitConnect(long timeout, @NonNull TimeUnit timeUnit) {
         networkClient.awaitConnect(timeout, timeUnit);
     }
 
@@ -62,17 +63,17 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void authenticate(PluginMeta pluginMeta) {
+    public void authenticate(@NonNull PluginMeta pluginMeta) {
         authenticationProvider.authenticateWithNewToken(pluginMeta);
     }
 
     @Override
-    public void authenticate(PluginMeta pluginMeta, String authToken) {
+    public void authenticate(@NonNull PluginMeta pluginMeta, @NonNull String authToken) {
         authenticationProvider.authenticateWithExistingToken(pluginMeta, authToken);
     }
 
     @Override
-    public CompletableFuture<Response> sendRequest(Request request) {
+    public CompletableFuture<Response> sendRequest(@NonNull Request request) {
         return requestDispatcher.send(request);
     }
 
@@ -97,7 +98,7 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void registerEventListener(Listener listener) {
+    public void registerEventListener(@NonNull Listener listener) {
         eventHandler.registerListener(listener);
     }
 }

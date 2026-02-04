@@ -1,10 +1,10 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.event.Event;
-import dev.adlin.vts4j.event.Listener;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
+import dev.adlin.vts4j.event.Event;
+import dev.adlin.vts4j.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ public interface VTSClient {
 
     VTSClient awaitConnect();
 
-    void awaitConnect(long timeout, TimeUnit timeUnit);
+    void awaitConnect(long timeout, final @NotNull TimeUnit timeUnit);
 
     void disconnect();
 
@@ -27,9 +27,9 @@ public interface VTSClient {
      * Sends an authentication request with the specified plugin name and author.
      * @param pluginMeta
      */
-    void authenticate(PluginMeta pluginMeta);
+    void authenticate(final @NotNull PluginMeta pluginMeta);
 
-    void authenticate(PluginMeta pluginMeta, String authToken);
+    void authenticate(final @NotNull PluginMeta pluginMeta, final @NotNull String authToken);
 
     /**
      * Sends a request to the server and returns a CompletableFuture to dispatch the response.
@@ -38,7 +38,7 @@ public interface VTSClient {
      * @param request object to be sent to the server. This object will be serialized to JSON
      * @return response from the server
      */
-    CompletableFuture<Response> sendRequest(Request request);
+    CompletableFuture<Response> sendRequest(final @NotNull Request request);
 
     /**
      * Sends a request with an event type and
@@ -74,5 +74,5 @@ public interface VTSClient {
      *
      * @param listener an instance of a class implementing the {@link Listener} interface.
      */
-    void registerEventListener(Listener listener);
+    void registerEventListener(final @NotNull Listener listener);
 }

@@ -3,6 +3,7 @@ package dev.adlin.vts4j.event;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import dev.adlin.vts4j.event.impl.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class EventRegistry {
@@ -24,24 +25,26 @@ public class EventRegistry {
          register("Live2DCubismEditorConnectedEvent", Live2DCubismEditorConnectedEvent.class);
     }
 
+    private EventRegistry() {
+    }
+
     private static void register(String eventName, Class<? extends Event> eventClass) {
         eventClasses.put(eventName, eventClass);
     }
 
-    @Nullable
-    public static Class<? extends Event> getEventClass(String eventName) {
+    public static @Nullable Class<? extends Event> getEventClass(final @NotNull String eventName) {
         return eventClasses.get(eventName);
     }
 
-    public static boolean exists(Class<? extends Event> eventClass) {
+    public static boolean exists(final @NotNull Class<? extends Event> eventClass) {
         return eventClasses.containsValue(eventClass);
     }
 
-    public static boolean exists(String eventName) {
+    public static boolean exists(final @NotNull String eventName) {
         return eventClasses.containsKey(eventName);
     }
 
-    public static String getName(Class<? extends Event> eventClass) {
+    public static @Nullable String getName(final @NotNull Class<? extends Event> eventClass) {
         return eventClasses.inverse().get(eventClass);
     }
 }

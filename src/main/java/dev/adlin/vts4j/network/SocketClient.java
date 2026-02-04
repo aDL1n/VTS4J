@@ -2,6 +2,7 @@ package dev.adlin.vts4j.network;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.util.function.Consumer;
@@ -13,7 +14,7 @@ public class SocketClient extends WebSocketClient {
     private Consumer<CloseReason> closeHandler;
     private Consumer<Exception> errorHandler;
 
-    public SocketClient(URI serverUri) {
+    public SocketClient(final @NotNull URI serverUri) {
         super(serverUri);
     }
 
@@ -33,8 +34,8 @@ public class SocketClient extends WebSocketClient {
     }
 
     @Override
-    public void onError(Exception ex) {
-        if (errorHandler != null) errorHandler.accept(ex);
+    public void onError(Exception exception) {
+        if (errorHandler != null) errorHandler.accept(exception);
     }
 
     /**
@@ -43,7 +44,7 @@ public class SocketClient extends WebSocketClient {
      *
      * @param onOpen The handler to be called on connection open. Receives a ServerHandshake object.
      */
-    public void setOpenHandler(Consumer<ServerHandshake> onOpen) {
+    public void setOpenHandler(final @NotNull Consumer<ServerHandshake> onOpen) {
         this.openHandler = onOpen;
     }
 
@@ -53,7 +54,7 @@ public class SocketClient extends WebSocketClient {
      *
      * @param messageHandler The handler to be called on message receipt. Receives the message as a String.
      */
-    public void setMessageHandler(Consumer<String> messageHandler) {
+    public void setMessageHandler(final @NotNull Consumer<String> messageHandler) {
         this.messageHandler = messageHandler;
     }
 
@@ -63,7 +64,7 @@ public class SocketClient extends WebSocketClient {
      *
      * @param onClose The handler to be called on connection close. Receives a CloseReason object.
      */
-    public void setCloseHandler(Consumer<CloseReason> onClose) {
+    public void setCloseHandler(final @NotNull Consumer<CloseReason> onClose) {
         this.closeHandler = onClose;
     }
 
@@ -73,7 +74,7 @@ public class SocketClient extends WebSocketClient {
      *
      * @param onError The handler to be called on error. Receives a Throwable object.
      */
-    public void setErrorHandler(Consumer<Exception> onError) {
+    public void setErrorHandler(final @NotNull Consumer<Exception> onError) {
         this.errorHandler = onError;
     }
 }

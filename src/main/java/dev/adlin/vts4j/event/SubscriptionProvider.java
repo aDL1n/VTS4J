@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class SubscriptionProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(SubscriptionProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionProvider.class);
 
     private final RequestDispatcher requestDispatcher;
 
@@ -24,11 +24,11 @@ public class SubscriptionProvider {
     }
 
     public CompletableFuture<Response> sendSubscribeRequest(
-            @NotNull Class<? extends Event> eventClass,
-            @Nullable JsonObject config,
+            final @NotNull Class<? extends Event> eventClass,
+            final @Nullable JsonObject config,
             boolean subscribe
     ) {
-        logger.trace("Sending subscription request");
+        LOGGER.trace("Sending subscription request");
 
         if (!EventRegistry.exists(eventClass))
             throw new IllegalArgumentException("Invalid event name");
@@ -38,7 +38,7 @@ public class SubscriptionProvider {
         payload.addProperty("subscribe", subscribe);
         if (config != null) payload.add("config", config);
 
-        Request sibscribeEventRequest = RequestBuilder.of(RequestType.EVENT_SUBSCRIPTION)
+        final Request sibscribeEventRequest = RequestBuilder.of(RequestType.EVENT_SUBSCRIPTION)
                 .setPayload(payload)
                 .build();
 

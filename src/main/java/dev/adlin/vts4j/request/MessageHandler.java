@@ -5,6 +5,7 @@ import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
 import dev.adlin.vts4j.event.EventRegistry;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,53 +13,55 @@ import java.util.function.Consumer;
 
 public class MessageHandler implements Consumer<String> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageHandler.class);
+    private static final Gson GSON = new Gson();
 
-    private final Gson gson = new Gson();
     private final RequestDispatcher requestDispatcher;
     private final EventHandler eventHandler;
 
-    public MessageHandler(RequestDispatcher requestDispatcher, EventHandler eventHandler) {
+    public MessageHandler(
+            final @NotNull RequestDispatcher requestDispatcher,
+            final @NotNull EventHandler eventHandler
+    ) {
         this.requestDispatcher = requestDispatcher;
         this.eventHandler = eventHandler;
     }
 
     @Override
-    public void accept(String payload) {
-        logger.trace("Inbound payload: {}", payload);
+    public void accept(final @NotNull String payload) {
+        LOGGER.trace("Inbound payload: {}", payload);
 
-        Response response = parseResponse(payload);
-        String responseId = response.getRequestId();
+        final Response response = parseResponse(payload);
+        final String responseId = response.getRequestId();
 
-        if (requestDispatcher.contains(responseId)) {
-            requestDispatcher.dispatch(response);
+        if (this.requestDispatcher.contains(responseId)) {
+            this.requestDispatcher.dispatch(response);
         } else if (EventRegistry.exists(response.getRequestType())) {
-            handleEvent(response);
+            this.handleEvent(response);
         }
     }
 
-    private Response parseResponse(String payload) {
-        return gson.fromJson(payload, Response.class);
+    private @NotNull Response parseResponse(final @NotNull String payload) {
+        return GSON.fromJson(payload, Response.class);
     }
 
-    private void handleEvent(Response response) {
-        logger.trace("Handling event");
+    private void handleEvent(final @NotNull Response response) {
+        LOGGER.trace("Handling event");
 
         try {
-            tryHandleEvent(response);
+            this.tryHandleEvent(response);
         } catch (Exception exception) {
-            logger.error("Failed handle event: {}", exception.getMessage());
+            LOGGER.error("Failed handle event: {}", exception.getMessage());
         }
     }
 
-    private void tryHandleEvent(Response response) {
-        String requestType = response.getRequestType();
+    private void tryHandleEvent(final @NotNull Response response) {
+        final String requestType = response.getRequestType();
 
-        Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
+        final Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
         if (eventClass == null) throw new IllegalStateException("Event class not found!");
 
-        Event event = gson.fromJson(response.getData(), eventClass);
-
-        eventHandler.callEvent(event);
+        final Event event = GSON.fromJson(response.getData(), eventClass);
+        this.eventHandler.callEvent(event);
     }
 }

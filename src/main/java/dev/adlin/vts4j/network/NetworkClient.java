@@ -1,6 +1,7 @@
 package dev.adlin.vts4j.network;
 
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -10,22 +11,22 @@ public class NetworkClient {
 
     private final SocketClient socket;
 
-    public NetworkClient(URI address) {
+    public NetworkClient(final @NotNull URI address) {
         this.socket = new SocketClient(address);
     }
 
     public void awaitConnect() {
         try {
-            socket.connectBlocking();
+            this.socket.connectBlocking();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Connection interrupted", e);
         }
     }
 
-    public void awaitConnect(long timeout, TimeUnit timeUnit) {
+    public void awaitConnect(long timeout, final @NotNull TimeUnit timeUnit) {
         try {
-            socket.connectBlocking(timeout, timeUnit);
+            this.socket.connectBlocking(timeout, timeUnit);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Connection interrupted", e);
@@ -33,12 +34,12 @@ public class NetworkClient {
     }
 
     public void connect() {
-        socket.connect();
+        this.socket.connect();
     }
 
     public void awaitDisconnect() {
         try {
-            socket.closeBlocking();
+            this.socket.closeBlocking();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Disconnection interrupted", e);
@@ -46,26 +47,26 @@ public class NetworkClient {
     }
 
     public void disconnect() {
-        socket.close();
+        this.socket.close();
     }
 
-    public void send(String payload) {
-        socket.send(payload);
+    public void send(final @NotNull String payload) {
+        this.socket.send(payload);
     }
 
-    public void setMessageHandler(Consumer<String> handleMessage) {
-        socket.setMessageHandler(handleMessage);
+    public void setMessageHandler(final @NotNull Consumer<String> handleMessage) {
+        this.socket.setMessageHandler(handleMessage);
     }
 
-    public void setErrorHandler(Consumer<Exception> handler) {
-        socket.setErrorHandler(handler);
+    public void setErrorHandler(final @NotNull Consumer<Exception> handler) {
+        this.socket.setErrorHandler(handler);
     }
 
-    public void setOpenHandler(Consumer<ServerHandshake> handshake) {
-        socket.setOpenHandler(handshake);
+    public void setOpenHandler(final @NotNull Consumer<ServerHandshake> handshake) {
+        this.socket.setOpenHandler(handshake);
     }
 
-    public void setCloseHandler(Consumer<CloseReason> closeReason) {
-        socket.setCloseHandler(closeReason);
+    public void setCloseHandler(final @NotNull Consumer<CloseReason> closeReason) {
+        this.socket.setCloseHandler(closeReason);
     }
 }
