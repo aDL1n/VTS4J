@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -15,6 +16,6 @@ public record Request(
         @SerializedName("apiVersion") @NotNull String apiVersion,
         @SerializedName("requestID") @NotNull String id,
         @SerializedName("messageType") @NotNull RequestType type,
-        @SerializedName("data") @NotNull Optional<JsonObject> payload
+        @SerializedName("data") @Nullable JsonObject payload
 ) {
 }

@@ -50,15 +50,17 @@ public class HotkeyManager {
                 RequestBuilder
                         .of(RequestType.HOTKEYS_IN_CURRENT_MODEL)
                         .build()
-        ).thenApply(response ->
-                response.payload()
-                        .map(payload -> {
-                            JsonArray array = payload.getAsJsonArray("availableHotkeys");
-                            return array.asList().stream()
-                                    .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
-                                    .toList();
-                        })
-                        .orElseGet(Collections::emptyList)
+        ).thenApply(response -> {
+            final JsonObject payload = response.payload();
+
+            if (payload == null) return Collections.emptyList();
+
+                JsonArray array = payload.getAsJsonArray("availableHotkeys");
+                return array.asList().stream()
+                        .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
+                        .toList();
+            }
+
         );
     }
 

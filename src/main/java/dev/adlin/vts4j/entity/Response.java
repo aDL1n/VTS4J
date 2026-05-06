@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -16,6 +17,6 @@ public record Response(
         @SerializedName("timestamp") long timestamp,
         @SerializedName("messageType") @NotNull RequestType requestType,
         @SerializedName("requestID") @NotNull String requestId,
-        @SerializedName("data") @NotNull Optional<JsonObject> payload
+        @SerializedName("data") @Nullable JsonObject payload
 ) {
 }

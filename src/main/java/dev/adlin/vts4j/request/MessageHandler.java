@@ -7,6 +7,7 @@ import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
 import dev.adlin.vts4j.event.EventRegistry;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public class MessageHandler implements Consumer<String> {
         final Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
         if (eventClass == null) throw new IllegalStateException("Event class not found!");
 
-        final Event event = GSON.fromJson(response.payload().orElse(new JsonObject()), eventClass);
-        this.eventHandler.callEvent(event);
+        final @Nullable Event event = GSON.fromJson(response.payload(), eventClass);
+        if (event != null) eventHandler.callEvent(event);
     }
 }

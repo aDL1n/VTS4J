@@ -42,7 +42,7 @@ public class AuthenticationProvider {
 
         return sendAuthRequest(RequestType.AUTHENTICATION_TOKEN, payload)
                 .thenApply(response -> {
-                    final JsonObject responsePayload = response.payload().get();
+                    final JsonObject responsePayload = response.payload();
                     return responsePayload.get("authenticationToken").getAsString();
                 });
     }

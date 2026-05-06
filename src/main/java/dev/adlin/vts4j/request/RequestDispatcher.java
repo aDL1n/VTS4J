@@ -74,7 +74,7 @@ public class RequestDispatcher {
         LOGGER.error("Error handled while dispatching response");
 
         //error message always include in response
-        final JsonObject responsePayload = response.payload().get();
+        final @NotNull JsonObject responsePayload = response.payload();
 
         final APIErrorException exception = new APIErrorException(
                 responsePayload.get("message").getAsString(),
