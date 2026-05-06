@@ -43,7 +43,6 @@ public enum RequestType {
     AUTHENTICATION("AuthenticationRequest"),
     AUTHENTICATION_TOKEN("AuthenticationTokenRequest");
 
-
     private final String requestName;
 
     RequestType(String requestName) {

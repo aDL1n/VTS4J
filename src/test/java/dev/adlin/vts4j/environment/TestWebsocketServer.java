@@ -113,7 +113,7 @@ public class TestWebsocketServer extends WebSocketServer {
     }
 
     private boolean checkAuthenticationToken(Request request) {
-        JsonObject payload = request.payload().get();
+        JsonObject payload = request.payload();
         String requestAuthenticationToken = payload.get("authenticationToken").getAsString();
 
         return authenticationToken.equals(requestAuthenticationToken);

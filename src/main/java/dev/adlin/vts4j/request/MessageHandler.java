@@ -43,8 +43,8 @@ public class MessageHandler implements Consumer<String> {
         }
     }
 
-    private static boolean isEvent(final @NotNull RequestType requestType) {
-        return EventRegistry.exists(requestType.toString());
+    private static boolean isEvent(final @NotNull String requestTypeName) {
+        return EventRegistry.exists(requestTypeName);
     }
 
     private @NotNull Response parseResponse(final @NotNull String payload) {
@@ -62,9 +62,7 @@ public class MessageHandler implements Consumer<String> {
     }
 
     private void tryHandleEvent(final @NotNull Response response) {
-        final RequestType requestType = response.requestType();
-
-        final Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
+        final Class<? extends Event> eventClass = EventRegistry.getEventClass(response.requestType());
         if (eventClass == null) throw new IllegalStateException("Event class not found!");
 
         final @Nullable Event event = GSON.fromJson(response.payload(), eventClass);

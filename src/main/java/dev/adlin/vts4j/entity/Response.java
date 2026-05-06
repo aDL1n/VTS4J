@@ -15,7 +15,7 @@ public record Response(
         @SerializedName("apiName") @NotNull String apiName,
         @SerializedName("apiVersion") @NotNull String apiVersion,
         @SerializedName("timestamp") long timestamp,
-        @SerializedName("messageType") @NotNull RequestType requestType,
+        @SerializedName("messageType") @NotNull String requestType,
         @SerializedName("requestID") @NotNull String requestId,
         @SerializedName("data") @Nullable JsonObject payload
 ) {

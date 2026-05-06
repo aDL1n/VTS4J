@@ -87,8 +87,8 @@ public class RequestBuilder {
                 apiName,
                 apiVersion,
                 requestId == null ? UUID.randomUUID().toString() : requestId,
-                requestType,
-                Optional.ofNullable(payload)
+                requestType.toString(),
+                payload
         );
     }
 }

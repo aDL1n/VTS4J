@@ -15,7 +15,7 @@ public record Request(
         @SerializedName("apiName") @NotNull String apiName,
         @SerializedName("apiVersion") @NotNull String apiVersion,
         @SerializedName("requestID") @NotNull String id,
-        @SerializedName("messageType") @NotNull RequestType type,
+        @SerializedName("messageType") @NotNull String type,
         @SerializedName("data") @Nullable JsonObject payload
 ) {
 }
