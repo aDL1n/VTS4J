@@ -1,6 +1,7 @@
 package dev.adlin.vts4j.request;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
@@ -32,13 +33,17 @@ public class MessageHandler implements Consumer<String> {
         LOGGER.trace("Inbound payload: {}", payload);
 
         final Response response = parseResponse(payload);
-        final String responseId = response.getRequestId();
+        final String responseId = response.requestId();
 
         if (this.requestDispatcher.contains(responseId)) {
             this.requestDispatcher.dispatch(response);
-        } else if (EventRegistry.exists(response.getRequestType())) {
+        } else if (isEvent(response.requestType())) {
             this.handleEvent(response);
         }
+    }
+
+    private static boolean isEvent(final @NotNull RequestType requestType) {
+        return EventRegistry.exists(requestType.toString());
     }
 
     private @NotNull Response parseResponse(final @NotNull String payload) {
@@ -56,12 +61,12 @@ public class MessageHandler implements Consumer<String> {
     }
 
     private void tryHandleEvent(final @NotNull Response response) {
-        final String requestType = response.getRequestType();
+        final RequestType requestType = response.requestType();
 
         final Class<? extends Event> eventClass = EventRegistry.getEventClass(requestType);
         if (eventClass == null) throw new IllegalStateException("Event class not found!");
 
-        final Event event = GSON.fromJson(response.getData(), eventClass);
+        final Event event = GSON.fromJson(response.payload().orElse(new JsonObject()), eventClass);
         this.eventHandler.callEvent(event);
     }
 }

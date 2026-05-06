@@ -5,25 +5,28 @@ import dev.adlin.vts4j.entity.Request;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class RequestBuilder {
-    private final @NotNull String requestType;
+
+    private final @NotNull RequestType requestType;
+
     private @NotNull String apiName = "VTubeStudioPublicAPI";
     private @NotNull String apiVersion = "1.0";
     private @Nullable String requestId;
     private @Nullable JsonObject payload;
 
-    private RequestBuilder(String type) {
+    private RequestBuilder(RequestType type) {
         this.requestType = type;
     }
 
     public static RequestBuilder of(RequestType requestType) {
-        return new RequestBuilder(requestType.toString());
+        return new RequestBuilder(requestType);
     }
 
     public static RequestBuilder of(String requestTypeName) {
-        return new RequestBuilder(requestTypeName);
+        return new RequestBuilder(RequestType.valueOf(requestTypeName));
     }
 
     /**
@@ -54,7 +57,7 @@ public class RequestBuilder {
      * @param requestId The unique identifier for the request. Cannot be null.
      * @return This Builder instance to allow method chaining.
      */
-    public RequestBuilder setRequestId(final @NotNull String requestId) {
+    public RequestBuilder setRequestId(final @Nullable String requestId) {
         this.requestId = requestId;
         return this;
     }
@@ -67,7 +70,7 @@ public class RequestBuilder {
      * @param payload Additional information required for certain types of requests
      * @return This Builder instance to allow method chaining
      */
-    public RequestBuilder setPayload(final @NotNull JsonObject payload) {
+    public RequestBuilder setPayload(final @Nullable JsonObject payload) {
         this.payload = payload;
         return this;
     }
@@ -85,7 +88,7 @@ public class RequestBuilder {
                 apiVersion,
                 requestId == null ? UUID.randomUUID().toString() : requestId,
                 requestType,
-                payload
+                Optional.ofNullable(payload)
         );
     }
 }

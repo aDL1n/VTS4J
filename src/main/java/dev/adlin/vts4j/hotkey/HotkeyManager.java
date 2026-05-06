@@ -1,9 +1,9 @@
 package dev.adlin.vts4j.hotkey;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -34,39 +35,47 @@ public class HotkeyManager {
      * This performs a blocking network request and overwrites existing cached data.
      * Call this method if hotkeys have been modified in the VTube Studio UI.
      */
-    public void refresh() {
-        final List<Hotkey> fetchedHotkeys = this.fetchHotkeys();
-
-        this.cachedHotkeys.clear();
-        this.cachedHotkeys.putAll(fetchedHotkeys.stream().collect(
-                        Collectors.toMap(Hotkey::id, hotkey -> hotkey)));
+    public CompletableFuture<Void> refresh() {
+        return fetchHotkeys().thenAccept((hotkeys) -> {
+            cachedHotkeys.clear();
+            cachedHotkeys.putAll(
+                    hotkeys.stream()
+                            .collect(Collectors.toMap(Hotkey::id, hotkey -> hotkey))
+            );
+        });
     }
 
-    private @NotNull List<Hotkey> fetchHotkeys() {
-        final Response response = client.sendRequest(
+    private @NotNull CompletableFuture<List<Hotkey>> fetchHotkeys() {
+        return client.sendRequest(
                 RequestBuilder
                         .of(RequestType.HOTKEYS_IN_CURRENT_MODEL)
-                        .build()).join();
-
-        final JsonObject responseData = response.getData();
-        return responseData.getAsJsonArray("availableHotkeys").asList().stream()
-                .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
-                .toList();
+                        .build()
+        ).thenApply(response ->
+                response.payload()
+                        .map(payload -> {
+                            JsonArray array = payload.getAsJsonArray("availableHotkeys");
+                            return array.asList().stream()
+                                    .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
+                                    .toList();
+                        })
+                        .orElseGet(Collections::emptyList)
+        );
     }
+
 
     /**
      * Triggers the specified hotkey by sending a request to the server.
      *
      * @param hotkey The hotkey to be triggered. Cannot be null.
      */
-    public void trigger(final @NotNull Hotkey hotkey) {
+    public CompletableFuture<Void> trigger(final @NotNull Hotkey hotkey) {
         final JsonObject payload = new JsonObject();
         payload.addProperty("hotkeyID", hotkey.id());
 
-        this.client.sendRequest(RequestBuilder.of(RequestType.HOTKEY_TRIGGER)
+        return client.sendRequest(RequestBuilder.of(RequestType.HOTKEY_TRIGGER)
                 .setPayload(payload)
                 .build()
-        );
+        ).thenAccept(response -> {});
     }
 
     /**
@@ -74,12 +83,12 @@ public class HotkeyManager {
      *
      * @param hotkeyName The name of the hotkey to be triggered. Cannot be null.
      */
-    public void trigger(final @NotNull String hotkeyName) {
+    public CompletableFuture<Void> trigger(final @NotNull String hotkeyName) {
         final Optional<Hotkey> hotkey = this.findByName(hotkeyName);
         if (hotkey.isEmpty())
             throw new NullPointerException("Hotkey not found");
 
-        this.trigger(hotkey.orElse(null));
+        return trigger(hotkey.orElse(null));
     }
 
     /**

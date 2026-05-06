@@ -1,6 +1,7 @@
 package dev.adlin.vts4j.request;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.exception.APIErrorException;
@@ -21,7 +22,7 @@ public class RequestDispatcher {
     private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
     private final NetworkClient networkClient;
 
-    public RequestDispatcher(NetworkClient networkClient) {
+    public RequestDispatcher(final @NotNull NetworkClient networkClient) {
         this.networkClient = networkClient;
     }
 
@@ -29,13 +30,13 @@ public class RequestDispatcher {
         LOGGER.trace("Sending request");
 
         final CompletableFuture<Response> future = new CompletableFuture<>();
-        this.pendingRequests.put(request.getId(), future);
+        this.pendingRequests.put(request.id(), future);
 
         final String payload = GSON.toJson(request, Request.class);
         try {
             this.networkClient.send(payload);
         } catch (Exception exception) {
-            this.handleException(request.getId(), exception);
+            this.handleException(request.id(), exception);
         }
 
         return future;
@@ -51,7 +52,7 @@ public class RequestDispatcher {
     public void dispatch(final @NotNull Response response) {
         LOGGER.trace("Dispatching response");
 
-        final CompletableFuture<Response> future = pendingRequests.remove(response.getRequestId());
+        final CompletableFuture<Response> future = pendingRequests.remove(response.requestId());
         if (future == null) return;
 
         if (this.isErrorResponse(response)) {
@@ -63,18 +64,21 @@ public class RequestDispatcher {
     }
 
     private boolean isErrorResponse(final @NotNull Response response) {
-        return "APIError".equals(response.getRequestType());
+        return "APIError".equals(response.requestType().toString());
     }
 
     private void handleErrorResponse(
             final @NotNull CompletableFuture<Response> future,
             final @NotNull Response response
     ) {
-        LOGGER.trace("Error handled while dispatching response");
+        LOGGER.error("Error handled while dispatching response");
+
+        //error message always include in response
+        final JsonObject responsePayload = response.payload().get();
 
         final APIErrorException exception = new APIErrorException(
-                response.getData().get("message").getAsString(),
-                response.getData().get("errorID").getAsInt());
+                responsePayload.get("message").getAsString(),
+                responsePayload.get("errorID").getAsInt());
 
         future.completeExceptionally(exception);
     }

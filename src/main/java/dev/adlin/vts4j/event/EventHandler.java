@@ -49,8 +49,8 @@ public class EventHandler {
             final Consumer<Event> listener = event -> {
                 try {
                     eventMethod.method.invoke(eventMethod.parent, event);
-                } catch (Exception e) {
-                    LOGGER.error("Failed to register method of event: {}", e.getMessage());
+                } catch (Exception exception) {
+                    LOGGER.error("Failed to register method of event: {}", exception.getMessage());
                 }
             };
 
@@ -135,11 +135,11 @@ public class EventHandler {
         @SuppressWarnings("unchecked")
         private Class<? extends Event> getEventType() {
             if (method != null && method.getParameterCount() > 0) {
-                Class<?>[] params = method.getParameterTypes();
-                if (params.length > 0) {
-                    Class<?> firstParam = params[0];
-                    if (Event.class.isAssignableFrom(firstParam)) {
-                        return (Class<? extends Event>) firstParam;
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes.length > 0) {
+                    Class<?> firstParameterType = parameterTypes[0];
+                    if (Event.class.isAssignableFrom(firstParameterType)) {
+                        return (Class<? extends Event>) firstParameterType;
                     }
                 }
 

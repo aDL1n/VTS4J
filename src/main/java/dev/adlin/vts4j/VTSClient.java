@@ -6,7 +6,6 @@ import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -25,10 +24,11 @@ public interface VTSClient {
 
     /**
      * Sends an authentication request with the specified plugin name and author.
+     *
      * @param pluginMeta
      * @return authentication token
      */
-    @NotNull String authenticate(final @NotNull PluginMeta pluginMeta);
+    @NotNull CompletableFuture<String> authenticate(final @NotNull PluginMeta pluginMeta);
 
     void authenticate(final @NotNull PluginMeta pluginMeta, final @NotNull String authToken);
 
@@ -51,7 +51,7 @@ public interface VTSClient {
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig);
+    CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass, @NotNull JsonObject eventConfig);
 
     /**
      * Sends a request with an eventName and config,
@@ -62,7 +62,7 @@ public interface VTSClient {
      */
     CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass);
 
-    CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass, @Nullable JsonObject eventConfig);
+    CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass, @NotNull JsonObject eventConfig);
 
     CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass);
 

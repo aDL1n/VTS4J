@@ -39,7 +39,9 @@ public enum RequestType {
     ITEM_PIN("ItemPinRequest"),
     POST_PROCESSING_LIST("PostProcessingListRequest"),
     POST_PROCESSING_UPDATE("PostProcessingUpdateRequest"),
-    EVENT_SUBSCRIPTION("EventSubscriptionRequest");
+    EVENT_SUBSCRIPTION("EventSubscriptionRequest"),
+    AUTHENTICATION("AuthenticationRequest"),
+    AUTHENTICATION_TOKEN("AuthenticationTokenRequest");
 
 
     private final String requestName;

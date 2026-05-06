@@ -37,8 +37,8 @@ public class TestWebsocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         Request request = parseRequest(message);
 
-        String requestType = request.getType();
-        String requestId = request.getId();
+        String requestType = request.type().toString();
+        String requestId = request.id();
 
         JsonObject response = null;
 
@@ -113,7 +113,7 @@ public class TestWebsocketServer extends WebSocketServer {
     }
 
     private boolean checkAuthenticationToken(Request request) {
-        JsonObject payload = request.getPayload();
+        JsonObject payload = request.payload().get();
         String requestAuthenticationToken = payload.get("authenticationToken").getAsString();
 
         return authenticationToken.equals(requestAuthenticationToken);

@@ -3,10 +3,12 @@ package dev.adlin.vts4j.event;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import dev.adlin.vts4j.event.impl.*;
+import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class EventRegistry {
+    
     private static final BiMap<String, Class<? extends Event>> eventClasses = HashBiMap.create();
 
     static {
@@ -30,6 +32,10 @@ public class EventRegistry {
 
     private static void register(String eventName, Class<? extends Event> eventClass) {
         eventClasses.put(eventName, eventClass);
+    }
+
+    public static @Nullable Class<? extends Event> getEventClass(final @NotNull RequestType requestType) {
+        return eventClasses.get(requestType.toString());
     }
 
     public static @Nullable Class<? extends Event> getEventClass(final @NotNull String eventName) {

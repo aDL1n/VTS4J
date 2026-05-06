@@ -2,9 +2,12 @@ package dev.adlin.vts4j.auth;
 
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.PluginMeta;
+import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
+import dev.adlin.vts4j.request.PayloadBuilder;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
+import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,53 +23,56 @@ public class AuthenticationProvider {
         this.requestDispatcher = dispatcher;
     }
 
-    public String authenticateWithNewToken(final @NotNull PluginMeta pluginMeta) {
+    public CompletableFuture<String> authenticateWithNewToken(final @NotNull PluginMeta pluginMeta) {
         LOGGER.info("Requesting authenticate with new token");
 
-        String token = requestToken(pluginMeta);
-        authenticateWithExistingToken(pluginMeta, token);
-
-        return token;
+        return requestToken(pluginMeta).thenCompose((token) ->
+                authenticateWithExistingToken(pluginMeta, token)
+                        .thenApply(response -> token)
+        );
     }
 
-    public void authenticateWithExistingToken(final @NotNull PluginMeta pluginMeta, final @NotNull String token) {
-        LOGGER.trace("Requesting authenticate");
-
-        JsonObject payload = new JsonObject();
-        payload.addProperty("pluginName", pluginMeta.name());
-        payload.addProperty("pluginDeveloper", pluginMeta.developer());
-        payload.addProperty("authenticationToken", token);
-
-        sendAuthRequest(
-                "AuthenticationRequest",
-                payload
-        ).join();
-    }
-
-    private String requestToken(PluginMeta pluginMeta) {
+    private CompletableFuture<String> requestToken(final @NotNull PluginMeta pluginMeta) {
         LOGGER.trace("Sending token request");
 
-        JsonObject payload = new JsonObject();
-        payload.addProperty("pluginName", pluginMeta.name());
-        payload.addProperty("pluginDeveloper", pluginMeta.developer());
-        payload.addProperty("pluginIcon", "");
+        final JsonObject payload = PayloadBuilder.builder()
+                .addField("pluginName", pluginMeta.name())
+                .addField("pluginDeveloper", pluginMeta.developer())
+                .build();
 
-        Response authenticationTokenResponse = sendAuthRequest(
-                "AuthenticationTokenRequest",
-                payload
-        ).join();
-
-        return authenticationTokenResponse.getData()
-                .get("authenticationToken").getAsString();
+        return sendAuthRequest(RequestType.AUTHENTICATION_TOKEN, payload)
+                .thenApply(response -> {
+                    final JsonObject responsePayload = response.payload().get();
+                    return responsePayload.get("authenticationToken").getAsString();
+                });
     }
 
-    private CompletableFuture<Response> sendAuthRequest(String requestType, JsonObject payload) {
-        LOGGER.trace("Sending auth request: {}", requestType);
+    public CompletableFuture<Void> authenticateWithExistingToken(
+            final @NotNull PluginMeta pluginMeta,
+            final @NotNull String token
+    ) {
+        LOGGER.info("Requesting authenticate with existing token");
 
-        return requestDispatcher.send(
-                RequestBuilder.of(requestType)
-                        .setPayload(payload)
-                        .build()
-        );
+        final JsonObject payload = PayloadBuilder.builder()
+                .addField("pluginName", pluginMeta.name())
+                .addField("pluginDeveloper", pluginMeta.developer())
+                .addField("authenticationToken", token)
+                .build();
+
+        return sendAuthRequest(RequestType.AUTHENTICATION, payload)
+                //200iq move
+                .thenAccept(response -> {});
+    }
+
+    private CompletableFuture<Response> sendAuthRequest(
+            final @NotNull RequestType requestType,
+            final @NotNull JsonObject payload
+    ) {
+        final Request authenticationRequest = RequestBuilder.of(requestType)
+                .setPayload(payload)
+                .build();
+
+        LOGGER.trace("Sending authentication request: {}", authenticationRequest);
+        return requestDispatcher.send(authenticationRequest);
     }
 }

@@ -1,9 +1,4 @@
-package example;
-
 import ch.qos.logback.classic.Level;
-import dev.adlin.vts4j.PluginMeta;
-import dev.adlin.vts4j.VTSClient;
-import dev.adlin.vts4j.VTSClientBuilder;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.event.EventListener;
 import dev.adlin.vts4j.event.EventPriority;
@@ -14,6 +9,8 @@ import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 
 public class Main {
+
+    //join's only for example
     public static void main(String[] args){
         VTSClient vtsClient = VTSClientBuilder.create()
                 .registerListeners(new TestListener())
@@ -22,19 +19,19 @@ public class Main {
                 .awaitConnect();
 
         PluginMeta pluginMeta = new PluginMeta("Example", "test");
-        vtsClient.authenticate(pluginMeta);
+        vtsClient.authenticate(pluginMeta).join();
 
         Request apiStateRequest = RequestBuilder.of(RequestType.API_STATE).build();
         vtsClient.sendRequest(apiStateRequest)
                 .thenAccept(System.out::println);
 
-        vtsClient.subscribe(TestEvent.class);
+        vtsClient.subscribe(TestEvent.class).join();
 
         HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
-        hotkeyManager.refresh();
+        hotkeyManager.refresh().join();
 
         // trigger hotkey by name
-//        hotkeyManager.trigger("toggleMic");
+//        hotkeyManager.trigger("toggleMic").join();
     }
 
     public static class TestListener implements Listener {

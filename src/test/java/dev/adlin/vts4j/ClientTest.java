@@ -39,7 +39,7 @@ class ClientTest {
 
     @Test
     void authenticationTest() {
-        final String token = vtsClient.authenticate(testPluginMeta);
+        final String token = vtsClient.authenticate(testPluginMeta).join();
 
         Assertions.assertFalse(token.isEmpty());
     }
@@ -52,7 +52,7 @@ class ClientTest {
 
         final Response response = vtsClient.sendRequest(request).join();
 
-        Assertions.assertEquals(response.getRequestType(), request.getType());
+        Assertions.assertEquals(response.requestType(), request.type());
     }
 
     @Test
