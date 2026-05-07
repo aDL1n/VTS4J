@@ -1,13 +1,16 @@
 package dev.adlin.vts4j.hotkey;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.VTSClient;
+import dev.adlin.vts4j.request.PayloadBuilder;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,7 @@ public class HotkeyManager {
      * This performs a blocking network request and overwrites existing cached data.
      * Call this method if hotkeys have been modified in the VTube Studio UI.
      */
-    public CompletableFuture<Void> refresh() {
+    public @NotNull CompletableFuture<Void> refresh() {
         return fetchHotkeys().thenAccept((hotkeys) -> {
             cachedHotkeys.clear();
             cachedHotkeys.putAll(
@@ -55,13 +58,11 @@ public class HotkeyManager {
 
             if (payload == null) return Collections.emptyList();
 
-                JsonArray array = payload.getAsJsonArray("availableHotkeys");
-                return array.asList().stream()
-                        .map(rawHotkey -> GSON.fromJson(rawHotkey, Hotkey.class))
-                        .toList();
-            }
+            final JsonElement hotkeysJson = payload.get("availableHotkeys");
+            final Type hotkeyListType = new TypeToken<List<Hotkey>>() {}.getType();
 
-        );
+            return GSON.fromJson(hotkeysJson, hotkeyListType);
+        });
     }
 
 
@@ -70,9 +71,10 @@ public class HotkeyManager {
      *
      * @param hotkey The hotkey to be triggered. Cannot be null.
      */
-    public CompletableFuture<Void> trigger(final @NotNull Hotkey hotkey) {
-        final JsonObject payload = new JsonObject();
-        payload.addProperty("hotkeyID", hotkey.id());
+    public @NotNull CompletableFuture<Void> trigger(final @NotNull Hotkey hotkey) {
+        final JsonObject payload = PayloadBuilder.builder()
+                .addField("hotkeyID", hotkey.id())
+                .build();
 
         return client.sendRequest(RequestBuilder.of(RequestType.HOTKEY_TRIGGER)
                 .setPayload(payload)
@@ -85,12 +87,12 @@ public class HotkeyManager {
      *
      * @param hotkeyName The name of the hotkey to be triggered. Cannot be null.
      */
-    public CompletableFuture<Void> trigger(final @NotNull String hotkeyName) {
-        final Optional<Hotkey> hotkey = this.findByName(hotkeyName);
+    public @NotNull CompletableFuture<Void> trigger(final @NotNull String hotkeyName) {
+        final Optional<Hotkey> hotkey = findByName(hotkeyName);
         if (hotkey.isEmpty())
-            throw new NullPointerException("Hotkey not found");
+            throw new IllegalArgumentException("Hotkey not found");
 
-        return trigger(hotkey.orElse(null));
+        return trigger(hotkey.get());
     }
 
     /**
@@ -99,7 +101,7 @@ public class HotkeyManager {
      * @return A Map containing the hotkeys.
      */
     public @NotNull Map<String, Hotkey> getHotkeys() {
-        return Collections.unmodifiableMap(this.cachedHotkeys);
+        return Collections.unmodifiableMap(cachedHotkeys);
     }
 
     /**
@@ -109,7 +111,7 @@ public class HotkeyManager {
      * @return optional with Hotkey object, or null if not found.
      */
     public @NotNull Optional<Hotkey> findByName(final @NotNull String hotkeyName) {
-        return this.cachedHotkeys.values().stream()
+        return cachedHotkeys.values().stream()
                 .filter(hotkey -> hotkey.name().equals(hotkeyName))
                 .findFirst();
     }

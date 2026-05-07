@@ -45,7 +45,7 @@ public class SocketClient extends WebSocketClient {
      * @param onOpen The handler to be called on connection open. Receives a ServerHandshake object.
      */
     public void setOpenHandler(final @NotNull Consumer<ServerHandshake> onOpen) {
-        this.openHandler = onOpen;
+        openHandler = onOpen;
     }
 
     /**

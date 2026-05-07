@@ -1,162 +1,87 @@
 package dev.adlin.vts4j.event;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class EventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
 
-    private final Map<Class<? extends Event>, List<ListenerContainer>> events = new HashMap<>();
+    private final Map<Class<? extends Event>, List<ListenerContainer>> events = new ConcurrentHashMap<>();
 
     public void callEvent(final @NotNull Event event) {
-        LOGGER.trace("Event called: {}", event.getClass().getName());
+        final List<ListenerContainer> containers = events.get(event.getClass());
+        if (containers == null) return;
 
-        if (eventsRegisteredForType(event.getClass())) {
-            final List<ListenerContainer> eventListeners = new ArrayList<>(this.events.get(event.getClass()));
+        LOGGER.trace("Event called: {}", event.getClass().getSimpleName());
+        containers.forEach(container -> container.notifyListener(event));
+    }
 
-            eventListeners.sort((l1, l2) -> {
-                if (l1.priority().getId() < l2.priority().getId())
-                    return 1;
-                else if (l1.priority().getId() > l2.priority().getId())
-                    return -1;
+    public void registerListener(final @NotNull Listener listener) {
+        Arrays.stream(listener.getClass().getDeclaredMethods())
+                .filter(this::isListenerMethod)
+                .forEach(method -> registerMethod(listener, method));
+    }
 
-                return 0;
-            });
+    private boolean isListenerMethod(final @NotNull Method method) {
+        return method.isAnnotationPresent(EventListener.class) &&
+                !Modifier.isStatic(method.getModifiers()) &&
+                isValid(method);
+    }
 
-            for (ListenerContainer container : eventListeners) {
-                container.notifyListener(event);
+    private boolean isValid(final @NotNull Method method) {
+        return method.getParameterCount() == 1 && Event.class.isAssignableFrom(method.getParameterTypes()[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerMethod(final @NotNull Listener listener, final @NotNull Method method) {
+        final EventListener annotation = method.getAnnotation(EventListener.class);
+        final Class<? extends Event> eventType = (Class<? extends Event>) method.getParameterTypes()[0];
+
+        final Consumer<Event> invoker = createInvoker(listener, method, eventType);
+        registerContainer(new ListenerContainer(eventType, invoker, annotation.priority()));
+    }
+
+    private @NotNull Consumer<Event> createInvoker(
+            final @NotNull Listener listener,
+            final @NotNull Method method,
+            final @NotNull Class<? extends Event> type
+    ) {
+        return event -> {
+            try {
+                method.invoke(listener, event);
+            } catch (Exception ex) {
+                LOGGER.error("Failed to handle event {}: {}", type.getSimpleName(), ex.getMessage());
             }
-        }
+        };
     }
 
-    public void registerListener(final @NotNull Listener listenerClass) {
-        this.registerListenerMethods(this.getEventMethods(listenerClass));
+    private void registerContainer(final @NotNull ListenerContainer container) {
+        final List<ListenerContainer> containers = new ArrayList<>(
+                events.getOrDefault(container.eventType, Collections.emptyList())
+        );
+
+        containers.add(container);
+        containers.sort(Comparator.comparingInt(
+                (ListenerContainer listenerContainer) -> listenerContainer.priority().getId()).reversed());
+
+        events.put(container.eventType, Collections.unmodifiableList(containers));
     }
 
-    private void registerListenerMethods(final @NotNull List<EventMethod> eventMethods) {
-        LOGGER.trace("Registering listener methods");
-
-        for (EventMethod eventMethod : eventMethods) {
-            final Consumer<Event> listener = event -> {
-                try {
-                    eventMethod.method.invoke(eventMethod.parent, event);
-                } catch (Exception exception) {
-                    LOGGER.error("Failed to register method of event: {}", exception.getMessage());
-                }
-            };
-
-            final ListenerContainer container = new ListenerContainer(
-                    eventMethod.eventType,
-                    listener,
-                    eventMethod.priority
-            );
-
-            this.registerListenerContainer(container);
-        }
-    }
-
-    private void registerListenerContainer(final @NotNull ListenerContainer container) {
-        if (!this.eventsRegisteredForType(container.eventType)) {
-            this.events.put(container.eventType, new ArrayList<>());
-        }
-
-        this.events.get(container.eventType).add(container);
-    }
-
-    private @NotNull List<EventMethod> getEventMethods(final @NotNull Listener listenerClass) {
-        final List<EventMethod> eventMethods = new ArrayList<>();
-
-        for (Method method : listenerClass.getClass().getMethods()) {
-            if (!Modifier.isStatic(method.getModifiers())) {
-                EventMethod eventMethod = EventMethod.createFrom(new AnalyzedMethod(method, listenerClass));
-                if (eventMethod != null && this.hasEventListenerAnnotation(eventMethod))
-                    eventMethods.add(eventMethod);
-            }
-        }
-
-        return eventMethods;
-    }
-
-    private boolean hasEventListenerAnnotation(final @NotNull EventMethod eventMethod) {
-        for (Annotation annotation : eventMethod.annotations) {
-            if (annotation instanceof EventListener) return true;
-        }
-
-        return false;
-    }
-
-    private boolean eventsRegisteredForType(final @NotNull Class<? extends Event> eventType) {
-        return events.containsKey(eventType);
-    }
-
-    private record ListenerContainer(Class<? extends Event> eventType, Consumer<Event> listener, EventPriority priority) {
-        public void notifyListener(Event event) {
+    private record ListenerContainer(
+            @NotNull Class<? extends Event> eventType,
+            @NotNull Consumer<Event> listener,
+            @NotNull EventPriority priority
+    ) {
+        public void notifyListener(final @NotNull Event event) {
             listener.accept(event);
-        }
-    }
-
-    private static class AnalyzedMethod {
-        protected Method method;
-        protected Listener parent;
-        protected List<Annotation> annotations = new ArrayList<>();
-
-        protected AnalyzedMethod(Method method, Listener parent) {
-            this.method = method;
-            this.parent = parent;
-            annotations.addAll(Arrays.asList(method.getAnnotations()));
-        }
-    }
-
-    private static class EventMethod extends AnalyzedMethod {
-        private final EventPriority priority;
-        private final Class<? extends Event> eventType;
-
-        private static EventMethod createFrom(AnalyzedMethod method) {
-            return new EventMethod(method);
-        }
-
-        private EventMethod(AnalyzedMethod method) {
-            super(method.method, method.parent);
-
-            this.priority = getPriority();
-            this.eventType = getEventType();
-        }
-
-        @Nullable
-        @SuppressWarnings("unchecked")
-        private Class<? extends Event> getEventType() {
-            if (method != null && method.getParameterCount() > 0) {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length > 0) {
-                    Class<?> firstParameterType = parameterTypes[0];
-                    if (Event.class.isAssignableFrom(firstParameterType)) {
-                        return (Class<? extends Event>) firstParameterType;
-                    }
-                }
-
-            }
-
-            return null;
-        }
-
-        @Nullable
-        private EventPriority getPriority() {
-            for (Annotation annotation : this.annotations) {
-                if (annotation instanceof EventListener listener) {
-                    return listener.priority();
-                }
-            }
-
-            return null;
         }
     }
 }

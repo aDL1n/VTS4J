@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class SubscriptionProvider {
+public class EventSubscriptionProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventSubscriptionProvider.class);
 
     private final RequestDispatcher requestDispatcher;
 
-    public SubscriptionProvider(RequestDispatcher requestDispatcher) {
+    public EventSubscriptionProvider(RequestDispatcher requestDispatcher) {
         this.requestDispatcher = requestDispatcher;
     }
 

@@ -7,7 +7,7 @@ import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
 import dev.adlin.vts4j.event.Listener;
-import dev.adlin.vts4j.event.SubscriptionProvider;
+import dev.adlin.vts4j.event.EventSubscriptionProvider;
 import dev.adlin.vts4j.network.NetworkClient;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public class VTSClientImpl implements VTSClient {
     private final RequestDispatcher requestDispatcher;
 
     private final AuthenticationProvider authenticationProvider;
-    private final SubscriptionProvider subscriptionProvider;
+    private final EventSubscriptionProvider eventSubscriptionProvider;
 
     protected VTSClientImpl(
             final @NotNull NetworkClient networkClient,
@@ -37,7 +37,7 @@ public class VTSClientImpl implements VTSClient {
         this.requestDispatcher = requestDispatcher;
 
         this.authenticationProvider = new AuthenticationProvider(requestDispatcher);
-        this.subscriptionProvider = new SubscriptionProvider(requestDispatcher);
+        this.eventSubscriptionProvider = new EventSubscriptionProvider(requestDispatcher);
     }
 
     @Override
@@ -87,12 +87,12 @@ public class VTSClientImpl implements VTSClient {
             final @NotNull Class<? extends Event> eventClass,
             final @NotNull JsonObject eventConfig
     ) {
-        return subscriptionProvider.sendSubscribeRequest(eventClass, Optional.of(eventConfig), true);
+        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.of(eventConfig), true);
     }
 
     @Override
     public CompletableFuture<Response> subscribe(final @NotNull Class<? extends Event> eventClass) {
-        return subscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), true);
+        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), true);
     }
 
     @Override
@@ -100,12 +100,12 @@ public class VTSClientImpl implements VTSClient {
             final @NotNull Class<? extends Event> eventClass,
             final @Nullable JsonObject eventConfig
     ) {
-        return subscriptionProvider.sendSubscribeRequest(eventClass, Optional.of(eventConfig), false);
+        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.ofNullable(eventConfig), false);
     }
 
     @Override
     public CompletableFuture<Response> unsubscribe(final @NotNull Class<? extends Event> eventClass) {
-        return subscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), false);
+        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), false);
     }
 
     @Override

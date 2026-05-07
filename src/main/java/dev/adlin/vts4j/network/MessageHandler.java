@@ -1,11 +1,11 @@
-package dev.adlin.vts4j.request;
+package dev.adlin.vts4j.network;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
 import dev.adlin.vts4j.event.EventRegistry;
+import dev.adlin.vts4j.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -36,10 +36,10 @@ public class MessageHandler implements Consumer<String> {
         final Response response = parseResponse(payload);
         final String responseId = response.requestId();
 
-        if (this.requestDispatcher.contains(responseId)) {
-            this.requestDispatcher.dispatch(response);
+        if (requestDispatcher.contains(responseId)) {
+            requestDispatcher.dispatch(response);
         } else if (isEvent(response.requestType())) {
-            this.handleEvent(response);
+            handleEvent(response);
         }
     }
 
@@ -55,7 +55,7 @@ public class MessageHandler implements Consumer<String> {
         LOGGER.trace("Handling event");
 
         try {
-            this.tryHandleEvent(response);
+            tryHandleEvent(response);
         } catch (Exception exception) {
             LOGGER.error("Failed handle event: {}", exception.getMessage());
         }

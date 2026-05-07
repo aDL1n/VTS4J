@@ -8,7 +8,7 @@ import dev.adlin.vts4j.event.impl.WebsocketCloseEvent;
 import dev.adlin.vts4j.event.impl.WebsocketErrorEvent;
 import dev.adlin.vts4j.event.impl.WebsocketOpenEvent;
 import dev.adlin.vts4j.network.NetworkClient;
-import dev.adlin.vts4j.request.MessageHandler;
+import dev.adlin.vts4j.network.MessageHandler;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -47,8 +47,9 @@ public class VTSClientBuilder {
 
     public VTSClient build() {
         final NetworkClient networkClient = new NetworkClient(websocketAddress);
-        final EventHandler eventHandler = new EventHandler();
         final RequestDispatcher requestDispatcher = new RequestDispatcher(networkClient);
+
+        final EventHandler eventHandler = new EventHandler();
 
         final MessageHandler messageHandler = new MessageHandler(requestDispatcher, eventHandler);
         networkClient.setMessageHandler(messageHandler);
@@ -76,8 +77,8 @@ public class VTSClientBuilder {
                 requestDispatcher
         );
 
-        if (!this.listeners.isEmpty())
-            this.listeners.forEach(client::registerEventListener);
+        if (!listeners.isEmpty())
+            listeners.forEach(client::registerEventListener);
 
         return client;
     }

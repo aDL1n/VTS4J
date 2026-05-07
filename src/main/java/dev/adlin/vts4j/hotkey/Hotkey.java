@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public record Hotkey(
         @SerializedName("name") @NotNull String name,
-        @SerializedName("type") @NotNull String type,
+        @SerializedName("type") @NotNull HotkeyAction action,
         @SerializedName("description") @NotNull String description,
         @SerializedName("hotkeyID") @NotNull String id,
         @SerializedName("itemInstanceID") @Nullable String itemInstanceId
