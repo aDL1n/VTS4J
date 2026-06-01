@@ -53,8 +53,9 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void awaitConnect(long timeout, final @NonNull TimeUnit timeUnit) {
+    public VTSClient awaitConnect(long timeout, final @NonNull TimeUnit timeUnit) {
         networkClient.awaitConnect(timeout, timeUnit);
+        return this;
     }
 
     @Override

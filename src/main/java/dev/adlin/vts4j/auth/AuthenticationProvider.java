@@ -8,22 +8,20 @@ import dev.adlin.vts4j.request.PayloadBuilder;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import dev.adlin.vts4j.request.RequestType;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
+@RequiredArgsConstructor
 public class AuthenticationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationProvider.class);
-    private final RequestDispatcher requestDispatcher;
+    private final @NotNull RequestDispatcher requestDispatcher;
 
-    public AuthenticationProvider(final @NotNull RequestDispatcher dispatcher) {
-        this.requestDispatcher = dispatcher;
-    }
-
-    public CompletableFuture<String> authenticateWithNewToken(final @NotNull PluginMeta pluginMeta) {
+    public @NotNull CompletableFuture<String> authenticateWithNewToken(final @NotNull PluginMeta pluginMeta) {
         LOGGER.info("Requesting authenticate with new token");
 
         return requestToken(pluginMeta).thenCompose((token) ->
@@ -32,7 +30,7 @@ public class AuthenticationProvider {
         );
     }
 
-    private CompletableFuture<String> requestToken(final @NotNull PluginMeta pluginMeta) {
+    private @NotNull CompletableFuture<String> requestToken(final @NotNull PluginMeta pluginMeta) {
         LOGGER.trace("Sending token request");
 
         final JsonObject payload = PayloadBuilder.builder()
@@ -47,7 +45,7 @@ public class AuthenticationProvider {
                 });
     }
 
-    public CompletableFuture<Void> authenticateWithExistingToken(
+    public @NotNull CompletableFuture<Void> authenticateWithExistingToken(
             final @NotNull PluginMeta pluginMeta,
             final @NotNull String token
     ) {
@@ -64,7 +62,7 @@ public class AuthenticationProvider {
                 .thenAccept(response -> {});
     }
 
-    private CompletableFuture<Response> sendAuthRequest(
+    private @NotNull CompletableFuture<Response> sendAuthRequest(
             final @NotNull RequestType requestType,
             final @NotNull JsonObject payload
     ) {

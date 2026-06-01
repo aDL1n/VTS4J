@@ -30,7 +30,7 @@ public class EventRegistry {
     private EventRegistry() {
     }
 
-    private static void register(String eventName, Class<? extends Event> eventClass) {
+    private static void register(final @NotNull String eventName, final @NotNull Class<? extends Event> eventClass) {
         eventClasses.put(eventName, eventClass);
     }
 

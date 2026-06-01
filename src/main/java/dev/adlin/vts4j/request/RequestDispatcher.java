@@ -6,6 +6,7 @@ import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.exception.APIErrorException;
 import dev.adlin.vts4j.network.NetworkClient;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +15,14 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 public class RequestDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestDispatcher.class);
     private static final Gson GSON = new Gson();
 
     private final ConcurrentHashMap<String, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
-    private final NetworkClient networkClient;
-
-    public RequestDispatcher(final @NotNull NetworkClient networkClient) {
-        this.networkClient = networkClient;
-    }
+    private final @NotNull NetworkClient networkClient;
 
     public @NotNull CompletableFuture<Response> send(final @NotNull Request request) {
         LOGGER.trace("Sending request");
@@ -64,7 +62,7 @@ public class RequestDispatcher {
     }
 
     private boolean isErrorResponse(final @NotNull Response response) {
-        return "APIError".equals(response.requestType().toString());
+        return "APIError".equals(response.requestType());
     }
 
     private void handleErrorResponse(

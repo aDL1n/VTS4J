@@ -3,9 +3,7 @@ package dev.adlin.vts4j.request;
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.entity.Request;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class RequestBuilder {
@@ -14,18 +12,18 @@ public class RequestBuilder {
 
     private @NotNull String apiName = "VTubeStudioPublicAPI";
     private @NotNull String apiVersion = "1.0";
-    private @Nullable String requestId;
-    private @Nullable JsonObject payload;
+    private @NotNull String requestId = UUID.randomUUID().toString();
+    private @NotNull JsonObject payload = new JsonObject();
 
-    private RequestBuilder(RequestType type) {
+    private RequestBuilder(final @NotNull RequestType type) {
         this.requestType = type;
     }
 
-    public static RequestBuilder of(RequestType requestType) {
+    public static @NotNull RequestBuilder of(final @NotNull RequestType requestType) {
         return new RequestBuilder(requestType);
     }
 
-    public static RequestBuilder of(String requestTypeName) {
+    public static @NotNull RequestBuilder of(final @NotNull String requestTypeName) {
         return new RequestBuilder(RequestType.valueOf(requestTypeName));
     }
 
@@ -35,7 +33,7 @@ public class RequestBuilder {
      * @param apiName The name of the API. Cannot be null.
      * @return This Builder instance to allow method chaining.
      */
-    public RequestBuilder setApiName(final @NotNull String apiName) {
+    public @NotNull RequestBuilder setApiName(final @NotNull String apiName) {
         this.apiName = apiName;
         return this;
     }
@@ -46,7 +44,7 @@ public class RequestBuilder {
      * @param apiVersion The version of the API. Cannot be null.
      * @return This Builder instance to allow method chaining.
      */
-    public RequestBuilder setApiVersion(final @NotNull String apiVersion) {
+    public @NotNull RequestBuilder setApiVersion(final @NotNull String apiVersion) {
         this.apiVersion = apiVersion;
         return this;
     }
@@ -57,7 +55,7 @@ public class RequestBuilder {
      * @param requestId The unique identifier for the request. Cannot be null.
      * @return This Builder instance to allow method chaining.
      */
-    public RequestBuilder setRequestId(final @Nullable String requestId) {
+    public @NotNull RequestBuilder setRequestId(final @NotNull String requestId) {
         this.requestId = requestId;
         return this;
     }
@@ -70,7 +68,7 @@ public class RequestBuilder {
      * @param payload Additional information required for certain types of requests
      * @return This Builder instance to allow method chaining
      */
-    public RequestBuilder setPayload(final @Nullable JsonObject payload) {
+    public @NotNull RequestBuilder setPayload(final @NotNull JsonObject payload) {
         this.payload = payload;
         return this;
     }
@@ -82,11 +80,11 @@ public class RequestBuilder {
      * @return A new Request object with the configured parameters.
      * @throws IllegalArgumentException If messageType is null.
      */
-    public Request build() {
+    public @NotNull Request build() {
         return new Request(
                 apiName,
                 apiVersion,
-                requestId == null ? UUID.randomUUID().toString() : requestId,
+                requestId,
                 requestType.toString(),
                 payload
         );

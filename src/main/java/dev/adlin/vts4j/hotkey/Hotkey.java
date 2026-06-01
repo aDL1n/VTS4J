@@ -15,5 +15,4 @@ public record Hotkey(
         @SerializedName("hotkeyID") @NotNull String id,
         @SerializedName("itemInstanceID") @Nullable String itemInstanceId
 ) {
-
 }

@@ -2,11 +2,9 @@ package dev.adlin.vts4j.entity;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import dev.adlin.vts4j.request.RequestType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 
 /**
  * An object used to serialize the response from the server.

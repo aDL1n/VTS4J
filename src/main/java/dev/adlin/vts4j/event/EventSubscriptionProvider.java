@@ -7,6 +7,7 @@ import dev.adlin.vts4j.request.PayloadBuilder;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import dev.adlin.vts4j.request.RequestType;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +15,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+@RequiredArgsConstructor
 public class EventSubscriptionProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSubscriptionProvider.class);
 
-    private final RequestDispatcher requestDispatcher;
+    private final @NotNull RequestDispatcher requestDispatcher;
 
-    public EventSubscriptionProvider(RequestDispatcher requestDispatcher) {
-        this.requestDispatcher = requestDispatcher;
-    }
-
-    public CompletableFuture<Response> sendSubscribeRequest(
+    public @NotNull CompletableFuture<Response> sendSubscribeRequest(
             final @NotNull Class<? extends Event> eventClass,
             final @NotNull Optional<JsonObject> config,
             boolean subscribe

@@ -2,46 +2,40 @@ package dev.adlin.vts4j.request;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PayloadBuilder {
 
-    private final Map<String, JsonPrimitive> fields = new HashMap<>();
+    private final JsonObject json = new JsonObject();
 
-    private PayloadBuilder() {
-    }
-
-    public static PayloadBuilder builder() {
+    public static @NotNull PayloadBuilder builder() {
         return new PayloadBuilder();
     }
 
-    public PayloadBuilder addField(String field, String value) {
-        fields.putIfAbsent(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull String value) {
+        json.add(field, new JsonPrimitive(value));
         return this;
     }
 
-    public PayloadBuilder addField(String field, Character value) {
-        fields.putIfAbsent(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Character value) {
+        json.add(field, new JsonPrimitive(value));
         return this;
     }
 
-    public PayloadBuilder addField(String field, Number value) {
-        fields.putIfAbsent(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Number value) {
+        json.add(field, new JsonPrimitive(value));
         return this;
     }
 
-    public PayloadBuilder addField(String field, Boolean value) {
-        fields.putIfAbsent(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Boolean value) {
+        json.add(field, new JsonPrimitive(value));
         return this;
     }
 
-    public JsonObject build() {
-        final JsonObject json = new JsonObject();
-
-        fields.forEach(json::add);
-
+    public @NotNull JsonObject build() {
         return json;
     }
 }

@@ -16,7 +16,7 @@ public interface VTSClient {
 
     VTSClient awaitConnect();
 
-    void awaitConnect(long timeout, final @NotNull TimeUnit timeUnit);
+    VTSClient awaitConnect(long timeout, final @NotNull TimeUnit timeUnit);
 
     void disconnect();
 
