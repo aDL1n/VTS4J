@@ -17,7 +17,7 @@ class ClientTest {
 
     private final TestWebsocketServer websocketServer = new TestWebsocketServer(8002);
 
-    PluginMeta testPluginMeta = new PluginMeta("test", "test");
+    private final PluginMeta testPluginMeta = new PluginMeta("test", "test");
     private VTSClient vtsClient;
 
     @BeforeEach

@@ -1,7 +1,6 @@
 package dev.adlin.vts4j.request;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;

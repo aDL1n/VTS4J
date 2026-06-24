@@ -1,5 +1,8 @@
 package dev.adlin.vts4j.event;
 
+import lombok.Getter;
+
+@Getter
 public enum EventPriority {
     LOW(1),
     NORMAL(2),
@@ -9,9 +12,5 @@ public enum EventPriority {
 
     EventPriority(int id) {
         this.id = id;
-    }
-
-    public int getId() {
-        return id;
     }
 }

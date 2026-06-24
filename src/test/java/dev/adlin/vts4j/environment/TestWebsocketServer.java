@@ -37,7 +37,7 @@ public class TestWebsocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         Request request = parseRequest(message);
 
-        String requestType = request.type().toString();
+        String requestType = request.type();
         String requestId = request.id();
 
         JsonObject response = null;
