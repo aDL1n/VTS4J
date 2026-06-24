@@ -20,7 +20,7 @@ public interface VTSClient {
 
     void disconnect();
 
-    void disconnectBlocking();
+    void awaitDisconnect();
 
     /**
      * Sends an authentication request with the specified plugin name and author.
@@ -30,7 +30,7 @@ public interface VTSClient {
      */
     @NotNull CompletableFuture<String> authenticate(final @NotNull PluginMeta pluginMeta);
 
-    void authenticate(final @NotNull PluginMeta pluginMeta, final @NotNull String authToken);
+    void authenticate(final @NotNull PluginMeta pluginMeta, final @NotNull String authenticationToken);
 
     /**
      * Sends a request to the server and returns a CompletableFuture to dispatch the response.
@@ -51,7 +51,10 @@ public interface VTSClient {
      *                    (more details at <a href="https://github.com/DenchiSoft/VTubeStudio/tree/master/Events#events">this page</a>)
      * @return CompletableFuture with a response about the success of the operation
      */
-    CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass, @NotNull JsonObject eventConfig);
+    CompletableFuture<Response> subscribe(
+            final @NotNull Class<? extends Event> eventClass,
+            final @NotNull JsonObject eventConfig
+    );
 
     /**
      * Sends a request with an eventName and config,
@@ -60,11 +63,14 @@ public interface VTSClient {
      * @param eventClass the class of event you need to subscribe
      * @return CompletableFuture with a response about the success of the operation
      */
-    CompletableFuture<Response> subscribe(@NotNull Class<? extends Event> eventClass);
+    CompletableFuture<Response> subscribe(final @NotNull Class<? extends Event> eventClass);
 
-    CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass, @NotNull JsonObject eventConfig);
+    CompletableFuture<Response> unsubscribe(
+            final @NotNull Class<? extends Event> eventClass,
+            final @NotNull JsonObject eventConfig
+    );
 
-    CompletableFuture<Response> unsubscribe(@NotNull Class<? extends Event> eventClass);
+    CompletableFuture<Response> unsubscribe(final @NotNull Class<? extends Event> eventClass);
 
     /**
      * Registers event listener.

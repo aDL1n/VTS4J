@@ -1,7 +1,7 @@
 package dev.adlin.vts4j;
 
 import com.google.gson.JsonObject;
-import dev.adlin.vts4j.auth.AuthenticationProvider;
+import dev.adlin.vts4j.authentication.AuthenticationProvider;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -41,7 +40,7 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public VTSClient connect(){
+    public VTSClient connect() {
         networkClient.connect();
         return this;
     }
@@ -64,7 +63,7 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void disconnectBlocking() {
+    public void awaitDisconnect() {
         networkClient.awaitDisconnect();
     }
 
@@ -74,8 +73,11 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public void authenticate(final @NonNull PluginMeta pluginMeta, final @NonNull String authToken) {
-        authenticationProvider.authenticateWithExistingToken(pluginMeta, authToken);
+    public void authenticate(
+            final @NonNull PluginMeta pluginMeta,
+            final @NonNull String authenticationToken
+    ) {
+        authenticationProvider.authenticateWithExistingToken(pluginMeta, authenticationToken);
     }
 
     @Override
@@ -88,12 +90,14 @@ public class VTSClientImpl implements VTSClient {
             final @NotNull Class<? extends Event> eventClass,
             final @NotNull JsonObject eventConfig
     ) {
-        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.of(eventConfig), true);
+        return eventSubscriptionProvider
+                .sendSubscribeRequest(eventClass, eventConfig, true);
     }
 
     @Override
     public CompletableFuture<Response> subscribe(final @NotNull Class<? extends Event> eventClass) {
-        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), true);
+        return eventSubscriptionProvider
+                .sendSubscribeRequest(eventClass, null, true);
     }
 
     @Override
@@ -101,12 +105,14 @@ public class VTSClientImpl implements VTSClient {
             final @NotNull Class<? extends Event> eventClass,
             final @Nullable JsonObject eventConfig
     ) {
-        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.ofNullable(eventConfig), false);
+        return eventSubscriptionProvider
+                .sendSubscribeRequest(eventClass, eventConfig, false);
     }
 
     @Override
     public CompletableFuture<Response> unsubscribe(final @NotNull Class<? extends Event> eventClass) {
-        return eventSubscriptionProvider.sendSubscribeRequest(eventClass, Optional.empty(), false);
+        return eventSubscriptionProvider
+                .sendSubscribeRequest(eventClass, null, false);
     }
 
     @Override

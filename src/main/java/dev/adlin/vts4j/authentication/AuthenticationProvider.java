@@ -1,4 +1,4 @@
-package dev.adlin.vts4j.auth;
+package dev.adlin.vts4j.authentication;
 
 import com.google.gson.JsonObject;
 import dev.adlin.vts4j.PluginMeta;

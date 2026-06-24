@@ -57,6 +57,8 @@ class ClientTest {
 
     @Test
     void testEventSubscribe() {
-        vtsClient.subscribe(TestEvent.class).join();
+        final Response response = vtsClient.subscribe(TestEvent.class).join();
+
+        Assertions.assertEquals("EventSubscriptionResponse", response.requestType());
     }
 }

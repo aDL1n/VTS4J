@@ -34,8 +34,8 @@ public class NetworkClient {
         }
     }
 
-    public @NotNull CompletableFuture<Void> connect() {
-        return CompletableFuture.runAsync(socket::connect);
+    public void connect() {
+        socket.connect();
     }
 
     public void awaitDisconnect() {

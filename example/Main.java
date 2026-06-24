@@ -1,10 +1,13 @@
 import ch.qos.logback.classic.Level;
+import dev.adlin.vts4j.PluginMeta;
+import dev.adlin.vts4j.VTSClient;
+import dev.adlin.vts4j.VTSClientBuilder;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.event.EventListener;
 import dev.adlin.vts4j.event.EventPriority;
 import dev.adlin.vts4j.event.Listener;
 import dev.adlin.vts4j.event.impl.TestEvent;
-import dev.adlin.vts4j.hotkey.HotkeyManager;
+import dev.adlin.vts4j.hotkey.Hotkeys;
 import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestType;
 
@@ -27,15 +30,16 @@ public class Main {
 
         vtsClient.subscribe(TestEvent.class).join();
 
-        HotkeyManager hotkeyManager = new HotkeyManager(vtsClient);
-        hotkeyManager.refresh().join();
+        Hotkeys hotkeys = new Hotkeys(vtsClient);
+        hotkeys.refresh().join();
 
         // trigger hotkey by name
-//        hotkeyManager.trigger("toggleMic").join();
+//        hotkeys.trigger("toggleMic").join();
     }
 
     public static class TestListener implements Listener {
-        @EventListener()
+
+        @EventListener
         public void test1(TestEvent event) {
             System.out.println("test1 event called! " + event.counter());
         }

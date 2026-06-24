@@ -1,5 +1,7 @@
 package dev.adlin.vts4j.hotkey;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -16,20 +18,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
  * Manages hotkeys by loading available hotkeys, triggering them, and providing access to hotkey information.
  */
-public class HotkeyManager {
+public class Hotkeys {
 
     private static final Gson GSON = new Gson();
 
     private final VTSClient client;
-    private final ConcurrentHashMap<String, Hotkey> cachedHotkeys = new ConcurrentHashMap<>();
+    private final Cache<String, Hotkey> cachedHotkeys = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .build();
 
-    public HotkeyManager(final @NotNull VTSClient client) {
+    public Hotkeys(final @NotNull VTSClient client) {
         this.client = client;
     }
 
@@ -40,7 +43,7 @@ public class HotkeyManager {
      */
     public @NotNull CompletableFuture<Void> refresh() {
         return fetchHotkeys().thenAccept((hotkeys) -> {
-            cachedHotkeys.clear();
+            cachedHotkeys.invalidateAll();
             cachedHotkeys.putAll(
                     hotkeys.stream()
                             .collect(Collectors.toMap(Hotkey::id, hotkey -> hotkey))
@@ -59,6 +62,7 @@ public class HotkeyManager {
             if (payload == null) return Collections.emptyList();
 
             final JsonElement hotkeysJson = payload.get("availableHotkeys");
+            System.out.println(hotkeysJson);
             final Type hotkeyListType = new TypeToken<List<Hotkey>>() {}.getType();
 
             return GSON.fromJson(hotkeysJson, hotkeyListType);
@@ -101,7 +105,7 @@ public class HotkeyManager {
      * @return A Map containing the hotkeys.
      */
     public @NotNull Map<String, Hotkey> getHotkeys() {
-        return Collections.unmodifiableMap(cachedHotkeys);
+        return Collections.unmodifiableMap(cachedHotkeys.asMap());
     }
 
     /**
@@ -111,7 +115,8 @@ public class HotkeyManager {
      * @return optional with Hotkey object, or null if not found.
      */
     public @NotNull Optional<Hotkey> findByName(final @NotNull String hotkeyName) {
-        return cachedHotkeys.values().stream()
+        return cachedHotkeys.asMap().values()
+                .stream()
                 .filter(hotkey -> hotkey.name().equals(hotkeyName))
                 .findFirst();
     }

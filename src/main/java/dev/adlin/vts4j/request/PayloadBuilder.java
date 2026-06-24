@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PayloadBuilder {
@@ -15,23 +16,43 @@ public class PayloadBuilder {
         return new PayloadBuilder();
     }
 
-    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull String value) {
-        json.add(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(
+            final @NotNull String field,
+            final @NotNull String value
+    ) {
+        json.addProperty(field, value);
         return this;
     }
 
-    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Character value) {
-        json.add(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(
+            final @NotNull String field,
+            final @NotNull Character value
+    ) {
+        json.addProperty(field, value);
         return this;
     }
 
-    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Number value) {
-        json.add(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(
+            final @NotNull String field,
+            final @NotNull Number value
+    ) {
+        json.addProperty(field, value);
         return this;
     }
 
-    public @NotNull PayloadBuilder addField(final @NotNull String field, final @NotNull Boolean value) {
-        json.add(field, new JsonPrimitive(value));
+    public @NotNull PayloadBuilder addField(
+            final @NotNull String field,
+            final @NotNull Boolean value
+    ) {
+        json.addProperty(field, value);
+        return this;
+    }
+
+    public @NotNull PayloadBuilder addOfNullable(
+            final @NotNull String field,
+            final @Nullable JsonObject value
+    ) {
+        if (value != null) json.add(field, value);
         return this;
     }
 
