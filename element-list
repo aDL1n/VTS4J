@@ -1,5 +1,5 @@
 dev.adlin.vts4j
-dev.adlin.vts4j.auth
+dev.adlin.vts4j.authentication
 dev.adlin.vts4j.entity
 dev.adlin.vts4j.event
 dev.adlin.vts4j.event.impl
