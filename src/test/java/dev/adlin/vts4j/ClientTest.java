@@ -1,6 +1,5 @@
 package dev.adlin.vts4j;
 
-import ch.qos.logback.classic.Level;
 import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.environment.TestWebsocketServer;
@@ -30,7 +29,6 @@ class ClientTest {
     private VTSClient createAndConnectClient() {
         final VTSClient testClient = VTSClientBuilder.create()
                 .setAddress(URI.create("ws://localhost:8002"))
-                .setLoggingLevel(Level.TRACE)
                 .build();
         testClient.awaitConnect();
 

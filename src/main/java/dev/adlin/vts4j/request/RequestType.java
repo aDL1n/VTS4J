@@ -1,8 +1,12 @@
 package dev.adlin.vts4j.request;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 /**
  * Types of Request
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public enum RequestType {
     API_STATE_BROADCAST("VTubeStudioAPIStateBroadcast"),
     API_STATE("APIStateRequest"),
@@ -44,10 +48,6 @@ public enum RequestType {
     AUTHENTICATION_TOKEN("AuthenticationTokenRequest");
 
     private final String requestName;
-
-    RequestType(String requestName) {
-        this.requestName = requestName;
-    }
 
     @Override
     public String toString() {

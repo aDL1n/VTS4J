@@ -1,80 +1,117 @@
 package dev.adlin.vts4j.network;
 
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.util.function.Consumer;
 
+/**
+ * Low-level WebSocket client implementation that bridges underlying socket events
+ * (open, message, close, error) to configurable functional consumers.
+ */
+@Slf4j
 public class SocketClient extends WebSocketClient {
 
-    private Consumer<ServerHandshake> openHandler;
-    private Consumer<String> messageHandler;
-    private Consumer<CloseReason> closeHandler;
-    private Consumer<Exception> errorHandler;
+    private @Nullable Consumer<ServerHandshake> openHandler;
+    private @Nullable Consumer<String> messageHandler;
+    private @Nullable Consumer<CloseReason> closeHandler;
+    private @Nullable Consumer<Exception> errorHandler;
 
-    public SocketClient(final @NotNull URI serverUri) {
+    /**
+     * Constructs a new {@code SocketClient} with the specified remote server URI.
+     *
+     * @param serverUri the raw {@link URI} of the destination WebSocket server
+     */
+    public SocketClient(final @NonNull URI serverUri) {
         super(serverUri);
     }
 
     @Override
-    public void onOpen(ServerHandshake handshake) {
-        if (openHandler != null) openHandler.accept(handshake);
+    public void onOpen(final ServerHandshake handshake) {
+        log.info("WebSocket handshake completed successfully. Connection is now OPEN to: [{}]", getURI());
+
+        if (openHandler != null) {
+            openHandler.accept(handshake);
+        } else {
+            log.debug("No custom openHandler assigned; skipping extended handshake processing");
+        }
     }
 
     @Override
-    public void onMessage(String message) {
-        if (messageHandler != null) messageHandler.accept(message);
+    public void onMessage(final String message) {
+        log.trace("Raw text frame received from socket: {}", message);
+
+        if (messageHandler != null) {
+            messageHandler.accept(message);
+        } else {
+            log.warn("Inbound message dropped. No active messageHandler is configured in the pipeline");
+        }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        if (closeHandler != null) closeHandler.accept(new CloseReason(code, reason, remote));
+        log.info("WebSocket connection CLOSED. Code: [{}], Reason: '{}', Remote initiated: [{}]", code, reason, remote);
+
+        if (closeHandler != null) {
+            closeHandler.accept(new CloseReason(code, reason, remote));
+        } else {
+            log.debug("No custom closeHandler assigned; skipping extended closure analysis");
+        }
     }
 
     @Override
-    public void onError(Exception exception) {
-        if (errorHandler != null) errorHandler.accept(exception);
+    public void onError(final Exception exception) {
+        // Передаем exception последним аргументом, чтобы гарантировать логирование Stack Trace в stderr/файл
+        log.error("An internal transport or protocol error occurred on the WebSocket connection", exception);
+
+        if (errorHandler != null) {
+            errorHandler.accept(exception);
+        } else {
+            log.debug("No custom errorHandler assigned; exception tracking relies strictly on framework logs");
+        }
     }
 
     /**
      * Sets the handler to be called when the WebSocket connection is opened.
-     * The provided Consumer will receive a ServerHandshake object containing details about the handshake.
      *
-     * @param onOpen The handler to be called on connection open. Receives a ServerHandshake object.
+     * @param onOpen the handler to be called on connection open, receives a {@link ServerHandshake} object
      */
-    public void setOpenHandler(final @NotNull Consumer<ServerHandshake> onOpen) {
-        openHandler = onOpen;
+    public void setOpenHandler(final @NonNull Consumer<ServerHandshake> onOpen) {
+        log.debug("Assigning new custom session open handler callback");
+        this.openHandler = onOpen;
     }
 
     /**
-     * Sets the handler to be called when a message is received from the WebSocket.
-     * The provided Consumer will receive the message as a String.
+     * Sets the handler to be called when a raw string message frame is received from the WebSocket.
      *
-     * @param messageHandler The handler to be called on message receipt. Receives the message as a String.
+     * @param messageHandler the handler to be called on message receipt, receives the message payload as a String
      */
-    public void setMessageHandler(final @NotNull Consumer<String> messageHandler) {
+    public void setMessageHandler(final @NonNull Consumer<String> messageHandler) {
+        log.debug("Assigning new custom message dispatcher pipeline callback");
         this.messageHandler = messageHandler;
     }
 
     /**
-     * Sets the handler to be called when the WebSocket connection is closed.
-     * The provided Consumer will receive a CloseReason object containing details about the closure.
+     * Sets the handler to be called when the WebSocket connection terminates.
      *
-     * @param onClose The handler to be called on connection close. Receives a CloseReason object.
+     * @param onClose the handler to be called on connection close, receives a {@link CloseReason} object
      */
-    public void setCloseHandler(final @NotNull Consumer<CloseReason> onClose) {
+    public void setCloseHandler(final @NonNull Consumer<CloseReason> onClose) {
+        log.debug("Assigning new custom connection closure analysis callback");
         this.closeHandler = onClose;
     }
 
     /**
-     * Sets the handler to be called when an error occurs in the WebSocket connection.
-     * The provided Consumer will receive a Throwable object representing the error.
+     * Sets the handler to be called when an unhandled exception or protocol error occurs.
      *
-     * @param onError The handler to be called on error. Receives a Throwable object.
+     * @param onError the handler to be called on error, receives an {@link Exception} object
      */
-    public void setErrorHandler(final @NotNull Consumer<Exception> onError) {
+    public void setErrorHandler(final @NonNull Consumer<Exception> onError) {
+        log.debug("Assigning new custom transport exception interceptor callback");
         this.errorHandler = onError;
     }
 }

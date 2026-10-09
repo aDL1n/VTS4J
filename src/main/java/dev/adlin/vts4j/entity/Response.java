@@ -2,19 +2,18 @@ package dev.adlin.vts4j.entity;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An object used to serialize the response from the server.
  */
 public record Response(
-        @SerializedName("apiName") @NotNull String apiName,
-        @SerializedName("apiVersion") @NotNull String apiVersion,
+        @SerializedName("apiName") @NonNull String apiName,
+        @SerializedName("apiVersion") @NonNull String apiVersion,
         @SerializedName("timestamp") long timestamp,
-        @SerializedName("messageType") @NotNull String requestType,
-        @SerializedName("requestID") @NotNull String requestId,
+        @SerializedName("messageType") @NonNull String requestType,
+        @SerializedName("requestID") @NonNull String requestId,
         @SerializedName("data") @Nullable JsonObject payload
 ) {
 }

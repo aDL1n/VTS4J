@@ -8,38 +8,61 @@ import dev.adlin.vts4j.request.RequestBuilder;
 import dev.adlin.vts4j.request.RequestDispatcher;
 import dev.adlin.vts4j.request.RequestType;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Provider responsible for managing event subscriptions by sending subscribe or
+ * unsubscribe requests to the remote server via a request dispatcher.
+ */
+@Slf4j
 @RequiredArgsConstructor
 public class EventSubscriptionProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventSubscriptionProvider.class);
-
     private static final String EVENT_CLASS_NAME_NULL = "Can't find event name by %s class";
 
-    private final @NotNull RequestDispatcher requestDispatcher;
+    private final @NonNull RequestDispatcher requestDispatcher;
 
-    public @NotNull CompletableFuture<Response> sendSubscribeRequest(
-            final @NotNull Class<? extends Event> eventClass,
+    /**
+     * Sends an asynchronous event subscription or unsubscription request to the remote server.
+     *
+     * @param eventClass the class type of the event to subscribe or unsubscribe from
+     * @param config     optional configuration payload for the event subscription, can be {@code null}
+     * @param subscribe  {@code true} to subscribe, {@code false} to unsubscribe
+     * @return a {@link CompletableFuture} containing the server response acknowledgment
+     * @throws IllegalArgumentException if the provided event class is not registered in the {@link EventRegistry}
+     */
+    public @NonNull CompletableFuture<Response> sendSubscribeRequest(
+            final @NonNull Class<? extends Event> eventClass,
             final @Nullable JsonObject config,
             boolean subscribe
     ) {
-        LOGGER.trace("Sending subscription request");
+        log.debug(
+                "Preparing event subscription request. Action: '{}', Event Class: '{}'",
+                subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE",
+                eventClass.getSimpleName()
+        );
 
-        if (!EventRegistry.exists(eventClass))
+        if (!EventRegistry.exists(eventClass)){
+            log.error(
+                    "Subscription failed: Event class '{}' is not registered in EventRegistry",
+                    eventClass.getName()
+            );
             throw new IllegalArgumentException("Invalid event name");
+        }
 
         String eventName = EventRegistry.getName(eventClass);
         if (eventName == null) {
-            return CompletableFuture.failedFuture(new NoSuchElementException(
-                    EVENT_CLASS_NAME_NULL.formatted(eventClass.getName())
-            ));
+            final String errorMessage = EVENT_CLASS_NAME_NULL.formatted(eventClass.getName());
+            log.error("Subscription failed: {}", errorMessage);
+
+            return CompletableFuture.failedFuture(
+                    new NoSuchElementException(errorMessage)
+            );
         }
 
         final JsonObject payload = PayloadBuilder.builder()
@@ -48,10 +71,12 @@ public class EventSubscriptionProvider {
                 .addOfNullable("config", config)
                 .build();
 
-        final Request sibscribeEventRequest = RequestBuilder.of(RequestType.EVENT_SUBSCRIPTION)
+        final Request subscribeEventRequest = RequestBuilder.of(RequestType.EVENT_SUBSCRIPTION)
                 .setPayload(payload)
                 .build();
 
-        return requestDispatcher.send(sibscribeEventRequest);
+        log.trace("Dispatching subscription request to dispatcher: {}", subscribeEventRequest);
+
+        return requestDispatcher.send(subscribeEventRequest);
     }
 }

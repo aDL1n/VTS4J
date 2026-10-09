@@ -2,6 +2,13 @@ package dev.adlin.vts4j.hotkey;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents the available actions that can be triggered via hotkeys.
+ * <p>
+ * This enum maps directly to the VTube Studio API hotkey action types
+ * using GSON's {@link SerializedName} annotations for JSON serialization.
+ * </p>
+ */
 public enum HotkeyAction {
     @SerializedName("Unset")
     UNSET,
