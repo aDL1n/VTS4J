@@ -6,17 +6,25 @@ import dev.adlin.vts4j.entity.Request;
 import dev.adlin.vts4j.entity.Response;
 import dev.adlin.vts4j.event.Event;
 import dev.adlin.vts4j.event.EventHandler;
-import dev.adlin.vts4j.event.Listener;
 import dev.adlin.vts4j.event.EventSubscriptionProvider;
+import dev.adlin.vts4j.event.Listener;
 import dev.adlin.vts4j.network.NetworkClient;
 import dev.adlin.vts4j.request.RequestDispatcher;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Robust implementation of the {@link VTSClient} interface.
+ * <p>
+ * This class acts as a structural Facade, encapsulating network topology, request dispatching,
+ * authentication layers, and subscription providers into a unified client entity.
+ * </p>
+ */
+@Slf4j
 public class VTSClientImpl implements VTSClient {
 
     private final NetworkClient networkClient;
@@ -27,9 +35,9 @@ public class VTSClientImpl implements VTSClient {
     private final EventSubscriptionProvider eventSubscriptionProvider;
 
     protected VTSClientImpl(
-            final @NotNull NetworkClient networkClient,
-            final @NotNull EventHandler eventHandler,
-            final @NotNull RequestDispatcher requestDispatcher
+            final @NonNull NetworkClient networkClient,
+            final @NonNull EventHandler eventHandler,
+            final @NonNull RequestDispatcher requestDispatcher
     ) {
         this.networkClient = networkClient;
         this.eventHandler = eventHandler;
@@ -68,7 +76,8 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public @NotNull CompletableFuture<String> authenticate(final @NonNull PluginMeta pluginMeta) {
+    public @NonNull CompletableFuture<String> authenticate(final @NonNull PluginMeta pluginMeta) {
+        log.info("Initiating full authentication sequence for plugin: '{}'", pluginMeta.name());
         return authenticationProvider.authenticateWithNewToken(pluginMeta);
     }
 
@@ -77,6 +86,7 @@ public class VTSClientImpl implements VTSClient {
             final @NonNull PluginMeta pluginMeta,
             final @NonNull String authenticationToken
     ) {
+        log.info("Initiating token-based direct authentication for plugin: '{}'", pluginMeta.name());
         authenticationProvider.authenticateWithExistingToken(pluginMeta, authenticationToken);
     }
 
@@ -87,22 +97,22 @@ public class VTSClientImpl implements VTSClient {
 
     @Override
     public CompletableFuture<Response> subscribe(
-            final @NotNull Class<? extends Event> eventClass,
-            final @NotNull JsonObject eventConfig
+            final @NonNull Class<? extends Event> eventClass,
+            final @NonNull JsonObject eventConfig
     ) {
         return eventSubscriptionProvider
                 .sendSubscribeRequest(eventClass, eventConfig, true);
     }
 
     @Override
-    public CompletableFuture<Response> subscribe(final @NotNull Class<? extends Event> eventClass) {
+    public CompletableFuture<Response> subscribe(final @NonNull Class<? extends Event> eventClass) {
         return eventSubscriptionProvider
                 .sendSubscribeRequest(eventClass, null, true);
     }
 
     @Override
     public CompletableFuture<Response> unsubscribe(
-            final @NotNull Class<? extends Event> eventClass,
+            final @NonNull Class<? extends Event> eventClass,
             final @Nullable JsonObject eventConfig
     ) {
         return eventSubscriptionProvider
@@ -110,7 +120,7 @@ public class VTSClientImpl implements VTSClient {
     }
 
     @Override
-    public CompletableFuture<Response> unsubscribe(final @NotNull Class<? extends Event> eventClass) {
+    public CompletableFuture<Response> unsubscribe(final @NonNull Class<? extends Event> eventClass) {
         return eventSubscriptionProvider
                 .sendSubscribeRequest(eventClass, null, false);
     }
